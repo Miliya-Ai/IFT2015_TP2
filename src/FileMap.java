@@ -86,12 +86,9 @@ public class FileMap<K,V> implements Map<K,V> {
             return false;
         } else {
             Entry bucket = table[bucketIndex];
-                 if (bucket.getKey() == key){
-                    return true;
-                 }
-
-
-
+             if (bucket.getKey() == key){
+                return true;
+             }
 
         }
         return false;
@@ -118,11 +115,9 @@ public class FileMap<K,V> implements Map<K,V> {
             } else {
                 Entry bucket = table[bucketIndex];
 
-                    if (bucket.containSpecificValue(value)) {
-                        return true;
-                    }
-
-
+                if (bucket.containSpecificValue(value)) {
+                    return true;
+                }
 
             }
         }
@@ -262,6 +257,7 @@ public class FileMap<K,V> implements Map<K,V> {
         if (buckets != 0) {
             for (int i = 0; i < capacity; i++) {
                 if (table[i] != null) {
+
                     entrySet.add(table[i]);
                 }
             }
@@ -299,7 +295,9 @@ public class FileMap<K,V> implements Map<K,V> {
         public V setValue( V value ) {
             ArrayList old = new ArrayList<>();
             old.addAll(v);
-            this.v.add(value);
+            if (!(containSpecificValue(value))){
+                this.v.add(value);
+            }
             return (V) old;
         }
         public void setNext(Entry next){ this.next = next;}
@@ -310,8 +308,12 @@ public class FileMap<K,V> implements Map<K,V> {
     public static void main(String[] args) throws Exception {
         FileMap foo = new FileMap();
 
-        foo.put("hi", 1);
-        foo.put("hi", 2);
-        System.out.println(foo.containsKey("yo"));
+        for (int i=0; i<20; i++){
+            foo.put("hi" + i,  1);
+
+        }
+        System.out.println(foo.entrySet());
+        System.out.println(foo.size());
+        System.out.println(foo.keySet());
     }
 }
