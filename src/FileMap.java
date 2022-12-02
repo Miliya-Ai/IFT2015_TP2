@@ -223,7 +223,8 @@ public class FileMap<K,V> implements Map<K,V> {
 
     @Override
     public Collection<V> values() {
-        Collection<V> values = new Collection<V>[];
+
+        Collection<V> values = new ArrayList<>();
 
         if (buckets != 0){
             for (int i = 0; i < capacity; i++){
