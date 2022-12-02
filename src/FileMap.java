@@ -196,6 +196,7 @@ public class FileMap<K,V> implements Map<K,V> {
                 table[i] = null;
             }
         }
+        buckets = 0;
     }
 
     @Override
@@ -222,7 +223,7 @@ public class FileMap<K,V> implements Map<K,V> {
 
     @Override
     public Collection<V> values() {
-        Collection<V> values = null;
+        Collection<V> values = new Collection<V>[];
 
         if (buckets != 0){
             for (int i = 0; i < capacity; i++){
@@ -264,7 +265,7 @@ public class FileMap<K,V> implements Map<K,V> {
      */
     protected static class Entry<K, V> implements Map.Entry<K,V>{
         private K k; // for the key
-        private ArrayList v; // for the value
+        private ArrayList v = new ArrayList(); // for the value
         private Entry next;
 
         public Entry( K key, V value ) {
@@ -297,9 +298,8 @@ public class FileMap<K,V> implements Map<K,V> {
             map.put("a",2);
             map.put("a",3);
             map.put("a",4);
-            map.put("a",5);
-            System.out.println(map);
-            System.out.println(clear());
+            map.put("b",5);
+            System.out.println(map.values());
             System.out.println(map.get("a"));
             System.out.println(map.size());
 
