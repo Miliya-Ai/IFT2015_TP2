@@ -264,25 +264,26 @@ public class FileMap<K,V> implements Map<K,V> {
      */
     protected static class Entry<K, V> implements Map.Entry<K,V>{
         private K k; // for the key
-        private V v; // for the value
+        private ArrayList v; // for the value
         private Entry next;
 
         public Entry( K key, V value ) {
             this.k = key;
-            this.v = value;
+            this.v.add(value);
         }
         // getters
         public K getKey() { return this.k; }
-        public V getValue() { return this.v; }
+        public V getValue() { return (V) this.v; }
         public Entry getNext(){return this.next;}
 
 
         protected void setKey( K key ) { this.k = key; }
         @Override
         public V setValue( V value ) {
-            V old = v;
-            this.v = value;
-            return old;
+            ArrayList old = new ArrayList<>();
+            old.addAll(v);
+            this.v.add(value);
+            return (V) old;
         }
         public void setNext(Entry next){ this.next = next;}
 
