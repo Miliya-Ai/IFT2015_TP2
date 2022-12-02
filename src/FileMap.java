@@ -201,7 +201,7 @@ public class FileMap<K,V> implements Map<K,V> {
 
     @Override
     public Set<K> keySet() {
-        Set<K> keySet = null;
+        Set<K> keySet = new HashSet<>();
 
         if (buckets != 0) {
 
@@ -210,11 +210,7 @@ public class FileMap<K,V> implements Map<K,V> {
                     continue;
                 } else {
                     Entry bucket = table[i];
-                    while (bucket.getNext() != null) {
-                        if (bucket.getKey() != null) {
-                            keySet.add((K) bucket.getKey());
-                        }
-                    }
+                    keySet.add((K) bucket.getKey());
                 }
             }
         }
@@ -232,11 +228,8 @@ public class FileMap<K,V> implements Map<K,V> {
                     continue;
                 } else {
                     Entry bucket = table[i];
-                    while (bucket.getNext() != null) {
-                        if (bucket.getKey() != null) {
-                            values.add((V) bucket.getValue());
-                        }
-                    }
+                    values.add((V) bucket.getValue());
+
                 }
             }
         }
@@ -244,7 +237,7 @@ public class FileMap<K,V> implements Map<K,V> {
     }
     @Override
     public Set<Map.Entry<K,V>> entrySet() {
-        Set<Map.Entry<K, V>> entrySet = null;
+        Set<Map.Entry<K, V>> entrySet = new HashSet<>();
 
         if (buckets != 0) {
             for (int i = 0; i < capacity; i++) {
@@ -299,8 +292,7 @@ public class FileMap<K,V> implements Map<K,V> {
             map.put("a",2);
             map.put("a",3);
             map.put("a",4);
-            map.put("b",5);
-            System.out.println(map.values());
+            System.out.println(map.keySet());
             System.out.println(map.get("a"));
             System.out.println(map.size());
 
