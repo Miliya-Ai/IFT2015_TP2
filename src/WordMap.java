@@ -25,18 +25,35 @@ public class WordMap<K,V> implements Map<K,V> {
         return size;
     }
     @Override
-    public boolean isEmpty() { }
+    public boolean isEmpty() {
+        return Boolean.parseBoolean(null);
+    }
     @Override
-    public boolean containsKey(Object key) { }
+    public boolean containsKey(Object key) {
+        return true; }
     @Override
-    public boolean containsValue(Object value) { }
+    public boolean containsValue(Object value) {
+        return true;
+    }
     @Override
     public V get(Object key) {
-        return null;
+        int index = key.hashCode() % capacity;
+        while (true){
+            if(table[index] == null){
+                return null;
+            }else if (key.equals(table[index].key)){
+                return table[index].value;
+            }else {
+                index = (index + 1) % capacity;
+            }
+        }
     }
 
     @Override
     public V put(K key, V value) {
+        if (key == null){
+            return null;
+        }
         int index = key.hashCode() % capacity;
         while(true) {
             if (table [index] == null) {
@@ -46,7 +63,7 @@ public class WordMap<K,V> implements Map<K,V> {
                 table[index] = new Entry<K, V>(key, value);
                 size++;
                 return null;
-            }else if (table[index].key.equals(key)){
+            }else if (key.equals(table[index].key)){
                 V old = table[index].value;
                 table[index].value = value;
                 return old;
@@ -66,6 +83,9 @@ public class WordMap<K,V> implements Map<K,V> {
             if(oldTable[i] == null){
                 continue;
             }
+            K key = (K) oldTable[i].key;
+            V value = (V) oldTable[i].value;
+            this.put(key,value);
 
         }
 
@@ -74,18 +94,52 @@ public class WordMap<K,V> implements Map<K,V> {
 
     @Override
     public V remove(Object key) {
-        return null;
+        int index = key.hashCode() % capacity;
+        while (true){
+            if(table[index] == null){
+                return null;
+            }else if (key.equals(table[index].key)){
+                return table[index].value;
+            }else {
+                index = (index + 1) % capacity;
+            }
+        }
     }
     @Override
     public void putAll(Map<? extends K,? extends V> m) {
-
     }
     @Override
     public void clear() {}
+
+    public int count(){
+        int count = 0;
+        for (Entry e: table){
+            if (e != null){
+                count++;
+            }
+    }
+        return count;
+    }
     @Override
-    public Set<K> keySet() {}
+    public Set<K> keySet() {
+        return null;
+    }
     @Override
-    public Collection<V> values() {}
+    public Collection<V> values() {
+        return null;
+    }
     @Override
-    public Set<Map.Entry<K,V>> entrySet() {}
+    public Set<Map.Entry<K,V>> entrySet() {
+        return null;
+    }
+
+    public static void main(String[] args){
+        WordMap<String,Integer> map = new WordMap<>();
+
+        for(int i = 0; i < 20; i++){
+            map.put((char)('a'+i) + "ello", i);
+            System.out.println(map);
+            System.out.println(map.size+""+map.count());
+        }
+    }
 }

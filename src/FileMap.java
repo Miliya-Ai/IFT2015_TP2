@@ -290,4 +290,19 @@ public class FileMap<K,V> implements Map<K,V> {
 
         public String toString() { return "<" + this.getKey() + ":" + this.getValue() + ">"; }
     }
+    public static void main(String[] args){
+        FileMap<String,Integer> map = new FileMap<>();
+
+            map.put("ello", 1);
+            map.put("a",2);
+            map.put("a",3);
+            map.put("a",4);
+            map.put("a",5);
+            System.out.println(map);
+            System.out.println(clear());
+            System.out.println(map.get("a"));
+            System.out.println(map.size());
+
+
+    }
 }
