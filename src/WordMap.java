@@ -9,11 +9,12 @@ public class WordMap<K,V> implements Map<K,V> {
             this.value = value;
         }
     }
-
     private int size;
     private int capacity;
+    private int numDeleted;
     private Entry<K,V>[] table;
     public  static final double Max_LOAD = 0.75;
+    private  final Entry<K,V> DELETED = new Entry(null,null);
 
     public WordMap(){
         size = 10;
@@ -26,14 +27,25 @@ public class WordMap<K,V> implements Map<K,V> {
     }
     @Override
     public boolean isEmpty() {
-        return Boolean.parseBoolean(null);
+        return this.size() == 0;
+    }
+
+    private int find(Object key) {
+        int index =  key.hashCode() % table.length;
+        while(table[index] != null && !key.equals(table[index].key)){
+            index = (index + 1) %  table.length;
+        }
+        return index;
+
     }
     @Override
     public boolean containsKey(Object key) {
-        return true; }
+        int index =  find(key);
+        return table[index] != null;
+    }
     @Override
     public boolean containsValue(Object value) {
-        return true;
+
     }
     @Override
     public V get(Object key) {
@@ -96,10 +108,14 @@ public class WordMap<K,V> implements Map<K,V> {
     public V remove(Object key) {
         int index = key.hashCode() % capacity;
         while (true){
-            if(table[index] == null){
+            if(table[index] == null ){
                 return null;
             }else if (key.equals(table[index].key)){
-                return table[index].value;
+                V old = table[index].value;
+                table[index] = DELETED;
+                size--;
+                numDeleted++;
+                return old;
             }else {
                 index = (index + 1) % capacity;
             }
@@ -108,8 +124,21 @@ public class WordMap<K,V> implements Map<K,V> {
     @Override
     public void putAll(Map<? extends K,? extends V> m) {
     }
+
+    public String toString(){
+        StringBuilder out = new StringBuilder();
+        for(Entry entry : table){
+            if(entry== null  || entry == DELETED){
+                continue;
+            }
+            out.append(entry + " ");
+        }
+
+        return out.toString();
+    }
     @Override
-    public void clear() {}
+    public void clear() {
+    }
 
     public int count(){
         int count = 0;
@@ -136,10 +165,12 @@ public class WordMap<K,V> implements Map<K,V> {
     public static void main(String[] args){
         WordMap<String,Integer> map = new WordMap<>();
 
-        for(int i = 0; i < 20; i++){
-            map.put((char)('a'+i) + "ello", i);
-            System.out.println(map);
+        for(int i = 0; i < 5; i++){
+            map.put((char)('a')+"ello", i);
             System.out.println(map.size+""+map.count());
         }
+        map.remove("aello");
+        System.out.println(map);
+
     }
 }
