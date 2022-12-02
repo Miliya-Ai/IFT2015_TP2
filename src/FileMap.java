@@ -1,4 +1,10 @@
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Random;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * FileMap utilise une structure de données ChainHashMap.
@@ -27,7 +33,7 @@ public class FileMap<K,V> implements Map<K,V> {
     public FileMap() { this( 11 ); } //appel le deuxieme constructeur
 
     /**
-     *
+     * Des le depart, la table a toutes des entry qui sont null
      */
     protected void createTable() {
         table = new Entry[this.capacity];
@@ -58,9 +64,16 @@ public class FileMap<K,V> implements Map<K,V> {
     @Override
     public boolean isEmpty() { return this.size() == 0; }
 
+    /**
+     *
+     * @param key cle a chercher dans FileMap
+     * @return true si cette cle ce trouve dans le FileMap
+     * @throws ClassCastException cle doit etre un String
+     */
     @Override
     public boolean containsKey(Object key) throws ClassCastException {
         int bucketIndex = hashValue(key);
+
         if (!(key instanceof String)){
             throw new ClassCastException("La cle doit etre un String, le nom du fichier");
         }
@@ -73,16 +86,23 @@ public class FileMap<K,V> implements Map<K,V> {
             return false;
         } else {
             Entry bucket = table[bucketIndex];
-            while (bucket.getNext() != null){
                  if (bucket.getKey() == key){
                     return true;
                  }
-                bucket = bucket.getNext();
-            }
-            return false;
+
+
+
 
         }
+        return false;
     }
+
+    /**
+     *
+     * @param value valeur a chercher dans le FileMap
+     * @return true si la valeur se trouve dans le FileMap
+     * @throws ClassCastException value doit etre un int
+     */
     @Override
     public boolean containsValue(Object value) throws ClassCastException {
         if (!(value instanceof Integer)){
@@ -97,18 +117,18 @@ public class FileMap<K,V> implements Map<K,V> {
                 continue;
             } else {
                 Entry bucket = table[bucketIndex];
-                while (bucket.getNext() != null) {
-                    if (bucket.getValue() == value) {
+
+                    if (bucket.containSpecificValue(value)) {
                         return true;
                     }
-                    bucket = bucket.getNext();
-                }
+
+
 
             }
         }
         return false;
     }
-    // TODO: value est dans un arraylist
+
     @Override
     public V get(Object key) throws ClassCastException {
         int bucketIndex = hashValue(key);
@@ -270,10 +290,12 @@ public class FileMap<K,V> implements Map<K,V> {
         public K getKey() { return this.k; }
         public V getValue() { return (V) this.v; }
         public Entry getNext(){return this.next;}
+        public boolean containSpecificValue(V value) {
+            return v.contains(value);
+        }
 
 
         protected void setKey( K key ) { this.k = key; }
-        @Override
         public V setValue( V value ) {
             ArrayList old = new ArrayList<>();
             old.addAll(v);
@@ -285,17 +307,11 @@ public class FileMap<K,V> implements Map<K,V> {
 
         public String toString() { return "<" + this.getKey() + ":" + this.getValue() + ">"; }
     }
-    public static void main(String[] args){
-        FileMap<String,Integer> map = new FileMap<>();
+    public static void main(String[] args) throws Exception {
+        FileMap foo = new FileMap();
 
-            map.put("ello", 1);
-            map.put("a",2);
-            map.put("a",3);
-            map.put("a",4);
-            System.out.println(map.keySet());
-            System.out.println(map.get("a"));
-            System.out.println(map.size());
-
-
+        foo.put("hi", 1);
+        foo.put("hi", 2);
+        System.out.println(foo.containsKey("yo"));
     }
 }
