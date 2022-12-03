@@ -291,75 +291,92 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                     ;
             }
         }
-        
-    private final class ValueIterator  implements Iterator<V> {
-        public V next() {
-            return nextEntry().value;
-        }
     }
 
-    private final class KeyIterator extends HashIterator<K> implements Iterator<K> {
-        public K next() {
-            return nextEntry().getKey();
-        }
-    }
-
-    private final class EntryIterator extends HashIterator<Map.Entry<K,V>> {
-        public Map.Entry<K,V> next() {
-            return nextEntry();
-        }
-    }
-
-    // Subclass overrides these to alter behavior of views' iterator() method
-    Iterator<K> newKeyIterator()   {
-        return new KeyIterator();
-    }
-    ValueIterator newValueIterator()   {
-        return new ValueIterator();
-    }
-    EntryIterator newEntryIterator()   {
-        return new EntryIterator();
-    }
 
     @Override
     public Set<K> keySet() {
-        Set<K> ks = keySet;
-        return (ks != null ? ks : (keySet = (Set<K>) new KeySet()));
-    }
+        if (keySet == null) {
+            keySet = new AbstractSet<K>() {
+                public Iterator<K> iterator() {
+                    return new Iterator<K>() {
+                        private Iterator<Map.Entry<K,V>> i = entrySet().iterator();
 
-    private  class KeySet {
-        public int size() {
-            return size;
+                        public boolean hasNext() {
+                            return i.hasNext();
+                        }
+
+                        public K next() {
+                            return i.next().getKey();
+                        }
+
+                        public void remove() {
+                            i.remove();
+                        }
+                    };
+                }
+
+                public int size() {
+                    return WordMap.this.size();
+                }
+
+                public boolean isEmpty() {
+                    return WordMap.this.isEmpty();
+                }
+
+                public void clear() {
+                    WordMap.this.clear();
+                }
+
+                public boolean contains(Object k) {
+                    return WordMap.this.containsKey(k);
+                }
+            };
         }
-        public boolean contains(Object o) {
-            return containsKey(o);
-        }
-        public void clear() {
-            WordMap.this.clear();
-        }
+        return keySet;
     }
 
 
     @Override
     public Collection<V> values() {
-        Collection<V> vs = values;
-        return (vs != null ? vs : (values = (Collection<V>) new Values()));
-    }
+        if (values == null) {
+            values = new AbstractCollection<V>() {
+                public Iterator<V> iterator() {
+                    return new Iterator<V>() {
+                        private Iterator<Map.Entry<K,V>> i = entrySet().iterator();
 
-    private final class Values extends AbstractCollection<V> {
-        public Iterator<V> iterator() {
-            return newValueIterator();
-        }
-        public int size() {
-            return size;
-        }
-        public boolean contains(Object o) {
-            return containsValue(o);
-        }
-        public void clear() {
-            WordMap.this.clear();
-        }
+                        public boolean hasNext() {
+                            return i.hasNext();
+                        }
 
+                        public V next() {
+                            return i.next().getValue();
+                        }
+
+                        public void remove() {
+                            i.remove();
+                        }
+                    };
+                }
+
+                public int size() {
+                    return WordMap.this.size();
+                }
+
+                public boolean isEmpty() {
+                    return WordMap.this.isEmpty();
+                }
+
+                public void clear() {
+                    WordMap.this.clear();
+                }
+
+                public boolean contains(Object v) {
+                    return WordMap.this.containsValue(v);
+                }
+            };
+        }
+        return values;
     }
     @Override
     public Set<Map.Entry<K,V>> entrySet() {
