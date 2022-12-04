@@ -1,10 +1,4 @@
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.Random;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * FileMap utilise une structure de données ChainHashMap.
@@ -13,7 +7,7 @@ import java.util.HashSet;
  * @param <K> cle : noms des fichiers
  * @param <V> valeur : positions du mot dans le fichier correspondant storer dans un arrayList
  */
-public class FileMap<K,V> implements Map<K,V> {
+public class FileMap<K,V> implements Map<K,V>{
     private Entry<K, V>[] table;
     private int buckets = 0; // le nombre de buckets
     protected int capacity; // size of the table
@@ -86,9 +80,12 @@ public class FileMap<K,V> implements Map<K,V> {
             return false;
         } else {
             Entry bucket = table[bucketIndex];
-             if (bucket.getKey() == key){
-                return true;
-             }
+            while (bucket.getNext() != null){
+                if (bucket.getKey() == key){
+                    return true;
+                }
+                bucket = bucket.getNext();
+            }
 
         }
         return false;
@@ -114,10 +111,13 @@ public class FileMap<K,V> implements Map<K,V> {
                 continue;
             } else {
                 Entry bucket = table[bucketIndex];
-
-                if (bucket.containSpecificValue(value)) {
-                    return true;
+                while (bucket.getNext() != null) {
+                    if (bucket.containSpecificValue(value)) {
+                        return true;
+                    }
+                    bucket = bucket.getNext();
                 }
+
 
             }
         }
@@ -153,21 +153,25 @@ public class FileMap<K,V> implements Map<K,V> {
         }
         int bucketIndex = hashValue(key);
         if (table[bucketIndex] == null){
-            table[bucketIndex] = new Entry<K, V>(key, value);
+            table[bucketIndex] = new Entry(key, value);
             buckets ++;
             return null;
+
         } else {
             Entry bucket = table[bucketIndex];
-            while (bucket.getNext() != null && bucket.getKey() != key){
+            while (bucket.getNext() != null && bucket.getKey() != key)
                 bucket = bucket.getNext();
-            }
-            if (bucket.getKey() == key){
-                return (V) bucket.setValue(value); // return l'ancienne valeur de la cle, null s'il en avait pas
-            } else {
+
+            if (bucket.getKey() == key)
+                 return (V) bucket.setValue(value); // return l'ancienne valeur de la cle, null s'il en avait pas
+             else {
                 bucket.setNext(new Entry(key,value));
+                buckets ++;
                 return null;
+
             }
         }
+
     }
     @Override
     public V remove(Object key) throws ClassCastException {
@@ -225,7 +229,15 @@ public class FileMap<K,V> implements Map<K,V> {
                     continue;
                 } else {
                     Entry bucket = table[i];
-                    keySet.add((K) bucket.getKey());
+                    while (bucket.getNext() != null) {
+
+                            keySet.add((K) bucket.getKey());
+
+                        bucket = bucket.getNext();
+                    }
+
+
+                   // keySet.add((K) bucket.getKey());
                 }
             }
         }
@@ -243,7 +255,12 @@ public class FileMap<K,V> implements Map<K,V> {
                     continue;
                 } else {
                     Entry bucket = table[i];
-                    values.add((V) bucket.getValue());
+                    while (bucket.getNext() != null) {
+
+                            values.add((V) bucket.getValue());
+
+                        bucket.getNext();
+                    }
 
                 }
             }
@@ -251,14 +268,14 @@ public class FileMap<K,V> implements Map<K,V> {
         return values;
     }
     @Override
-    public Set<Map.Entry<K,V>> entrySet() {
+    public Set<Map.Entry<K, V>> entrySet() {
         Set<Map.Entry<K, V>> entrySet = new HashSet<>();
 
         if (buckets != 0) {
             for (int i = 0; i < capacity; i++) {
                 if (table[i] != null) {
 
-                    entrySet.add(table[i]);
+                    //entrySet.add(table[i]);
                 }
             }
         }
@@ -273,7 +290,7 @@ public class FileMap<K,V> implements Map<K,V> {
      * @param <K> cle d'une entry
      * @param <V> valeur d'une entry
      */
-    protected static class Entry<K, V> implements Map.Entry<K,V>{
+    protected static class Entry<K, V>  {
         private K k; // for the key
         private ArrayList v = new ArrayList(); // for the value
         private Entry next;
@@ -281,6 +298,7 @@ public class FileMap<K,V> implements Map<K,V> {
         public Entry( K key, V value ) {
             this.k = key;
             this.v.add(value);
+            this.next = null;
         }
         // getters
         public K getKey() { return this.k; }
@@ -303,7 +321,10 @@ public class FileMap<K,V> implements Map<K,V> {
         public void setNext(Entry next){ this.next = next;}
 
 
+
         public String toString() { return "<" + this.getKey() + ":" + this.getValue() + ">"; }
+
+
     }
     public static void main(String[] args) throws Exception {
         FileMap foo = new FileMap();
@@ -312,7 +333,7 @@ public class FileMap<K,V> implements Map<K,V> {
             foo.put("hi" + i,  1);
 
         }
-        System.out.println(foo.entrySet());
+        //System.out.println(foo.values());
         System.out.println(foo.size());
         System.out.println(foo.keySet());
     }
