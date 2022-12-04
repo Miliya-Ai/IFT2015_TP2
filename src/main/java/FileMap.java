@@ -3,7 +3,7 @@ import java.util.*;
 /**
  * FileMap utilise une structure de données ChainHashMap.
  *
- * Code inspire du prof et https://www.algolist.net/Data_structures/Hash_table/Chaining
+ * Code inspire du prof, https://www.algolist.net/Data_structures/Hash_table/Chaining et du hashMap de java
  * @param <K> cle : noms des fichiers
  * @param <V> valeur : positions du mot dans le fichier correspondant storer dans un arrayList
  */
@@ -13,6 +13,7 @@ public class FileMap<K,V> implements Map<K,V>{
     protected int capacity; // size of the table
     private int prime; // prime factor
     private long scale, shift; // shift and scale factors
+    int modCount;
 
     // TODO: verifier les cas exceptionnels propres a fileMap
     public FileMap(int capacity, int prime) {
@@ -75,11 +76,12 @@ public class FileMap<K,V> implements Map<K,V>{
      */
     @Override
     public boolean containsKey(Object key) throws ClassCastException {
-        int bucketIndex = hashValue(key);
-
         if (!(key instanceof String)){
             throw new ClassCastException("La cle doit etre un String, le nom du fichier");
         }
+        return getEntry(key) != null;
+/*
+
 
         if (size() == 0){
             return false;
@@ -98,6 +100,21 @@ public class FileMap<K,V> implements Map<K,V>{
 
         }
         return false;
+
+ */
+
+    }
+    final FileMap.Entry<K,V> getEntry(Object key) {
+        int bucketIndex = hashValue(key);
+
+        for (FileMap.Entry<K,V> e = table[bucketIndex];
+             e != null;
+             e = e.next) {
+            Object k;
+            if (((k = e.key) == key || (key != null && key.equals(k))))
+                return e;
+        }
+        return null;
     }
 
     /**
@@ -115,6 +132,7 @@ public class FileMap<K,V> implements Map<K,V>{
         if (size() == 0){
             return false;
         }
+        /*
         for (int bucketIndex = 0 ; bucketIndex< capacity; bucketIndex++){
             if (table[bucketIndex] == null){
                 continue;
@@ -130,6 +148,14 @@ public class FileMap<K,V> implements Map<K,V>{
 
             }
         }
+        return false;
+
+         */
+        FileMap.Entry[] tab = table;
+        for (int i = 0; i < tab.length ; i++)
+            for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
+                if (value.equals(e.value))
+                    return true;
         return false;
     }
 
@@ -232,7 +258,12 @@ public class FileMap<K,V> implements Map<K,V>{
         Set<K> keySet = new HashSet<>();
 
         if (buckets != 0) {
+            FileMap.Entry[] tab = table;
+            for (int i = 0; i < tab.length ; i++)
+                for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
+                    keySet.add((K) e.getKey());
 
+/*
             for (int i = 0; i < capacity; i++){
                 if (table[i] == null) {
                     continue;
@@ -249,7 +280,10 @@ public class FileMap<K,V> implements Map<K,V>{
                    // keySet.add((K) bucket.getKey());
                 }
             }
+  */
         }
+
+
         return keySet;
     }
 
@@ -259,6 +293,11 @@ public class FileMap<K,V> implements Map<K,V>{
         Collection<V> values = new ArrayList<>();
 
         if (buckets != 0){
+            FileMap.Entry[] tab = table;
+            for (int i = 0; i < tab.length ; i++)
+                for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
+                    values.add((V) e.getValue());
+            /*
             for (int i = 0; i < capacity; i++){
                 if (table[i] == null) {
                     continue;
@@ -273,6 +312,8 @@ public class FileMap<K,V> implements Map<K,V>{
 
                 }
             }
+
+             */
         }
         return values;
     }
@@ -280,13 +321,21 @@ public class FileMap<K,V> implements Map<K,V>{
     public Set<Map.Entry<K, V>> entrySet() {
         Set<Map.Entry<K, V>> entrySet = new HashSet<>();
 
+
         if (buckets != 0) {
+            FileMap.Entry[] tab = table;
+            for (int i = 0; i < tab.length ; i++)
+                for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
+                    entrySet.add((e));
+            /*
             for (int i = 0; i < capacity; i++) {
                 if (table[i] != null) {
 
                     //entrySet.add(table[i]);
                 }
             }
+
+             */
         }
         return entrySet;
     }
@@ -299,31 +348,32 @@ public class FileMap<K,V> implements Map<K,V>{
      * @param <K> cle d'une entry
      * @param <V> valeur d'une entry
      */
-    protected static class Entry<K, V>  {
-        private K k; // for the key
-        private ArrayList v = new ArrayList(); // for the value
+    protected static class Entry<K, V>  implements Map.Entry<K, V>{
+        private K key; // for the key
+        private ArrayList value = new ArrayList(); // for the value
         private Entry next;
 
+
         public Entry( K key, V value ) {
-            this.k = key;
-            this.v.add(value);
+            this.key = key;
+            this.value.add(value);
             this.next = null;
         }
         // getters
-        public K getKey() { return this.k; }
-        public V getValue() { return (V) this.v; }
+        public K getKey() { return this.key; }
+        public V getValue() { return (V) this.value; }
         public Entry getNext(){return this.next;}
         public boolean containSpecificValue(V value) {
-            return v.contains(value);
+            return this.value.contains(value);
         }
 
 
-        protected void setKey( K key ) { this.k = key; }
+        protected void setKey( K key ) { this.key = key; }
         public V setValue( V value ) {
             ArrayList old = new ArrayList<>();
-            old.addAll(v);
+            old.addAll(this.value);
             if (!(containSpecificValue(value))){
-                this.v.add(value);
+                this.value.add(value);
             }
             return (V) old;
         }
@@ -335,18 +385,86 @@ public class FileMap<K,V> implements Map<K,V>{
 
 
     }
+
+    private abstract class FileMapIterator<E> implements Iterator<E> {
+        FileMap.Entry<K,V> next;        // next entry to return
+        int expectedModCount;   // For fast-fail
+        int index;              // current slot
+        FileMap.Entry<K,V> current;     // current entry
+
+        void HashIterator() {
+            expectedModCount = modCount;
+            if (buckets > 0) { // advance to first entry
+                FileMap.Entry[] t = table;
+                while (index < t.length && (next = t[index++]) == null)
+                    ;
+            }
+        }
+
+        public final boolean hasNext() {
+            return next != null;
+        }
+
+        final FileMap.Entry<K,V> nextEntry() {
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+            FileMap.Entry<K,V> e = next;
+            if (e == null)
+                throw new NoSuchElementException();
+
+            if ((next = e.next) == null) {
+                FileMap.Entry[] t = table;
+                while (index < t.length && (next = t[index++]) == null)
+                    ;
+            }
+            current = e;
+            return e;
+        }
+
+
+    }
+
+    private final class ValueIterator extends FileMapIterator<V> {
+        public V next() {
+            return (V) nextEntry().value;
+        }
+    }
+
+    private final class KeyIterator extends FileMapIterator<K> {
+        public K next() {
+            return nextEntry().getKey();
+        }
+    }
+
+    private final class EntryIterator extends FileMapIterator<Map.Entry<K,V>> {
+        public Map.Entry<K,V> next() {
+            return nextEntry();
+        }
+    }
+
+    // Subclass overrides these to alter behavior of views' iterator() method
+    Iterator<K> newKeyIterator()   {
+        return new FileMap.KeyIterator();
+    }
+    Iterator<V> newValueIterator()   {
+        return new FileMap.ValueIterator();
+    }
+    Iterator<Map.Entry<K,V>> newEntryIterator()   {
+        return new FileMap.EntryIterator();
+    }
     public static void main(String[] args) throws Exception {
         FileMap foo = new FileMap();
-/*
+
         for (int i=0; i<20; i++){
             foo.put("hi" + i,  1);
 
         }
- */
 
 
-        //System.out.println(foo.values());
+        System.out.println(foo.containsKey("hi16"));
         System.out.println(foo.size());
         System.out.println(foo.keySet());
+        System.out.println(foo.values());
+        System.out.println(foo.entrySet());
     }
 }

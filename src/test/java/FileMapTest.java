@@ -40,18 +40,20 @@ class FileMapTest {
 
     @Test
     void containsKey() {
+        assertThrows(ClassCastException.class, () -> {fileMap.containsKey(50);});
         initializeElem();
         assertTrue(fileMap.containsKey("hi13"));
         assertTrue(fileMap.containsKey("hi5"));
-        assertTrue(fileMap.containsKey("hi20"));
+        assertTrue(fileMap.containsKey("hi19"));
 
     }
 
     @Test
+    @DisplayName("ContainsValue")
     void containsValue() {
         initializeElem();
         fileMap.put("yo", 50);
-        assertTrue(fileMap.containsKey(50));
+        assertTrue(fileMap.containsKey("yo"), "Doit etre true");
 
     }
 
