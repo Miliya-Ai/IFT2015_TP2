@@ -48,8 +48,8 @@ class WordMapTest {
         FileMap fileMap2 = new FileMap<>();
         FileMap fileMap3 = new FileMap<>();
 
-        map.put("hi", fileMap);
-        map.put("hi", fileMap2);
+        //map.put("hi", fileMap);
+        //map.put("hi", fileMap2);
 
         assertTrue(map.containsValue(fileMap2));
         assertFalse(map.containsValue(fileMap3));
@@ -98,7 +98,7 @@ class WordMapTest {
     public void initializeElem(){
         FileMap fileMap = new FileMap<>();
         for (int i=0; i<20; i++){
-            map.put("hi" + i,  fileMap); //WorldMap doit accepter un FileMap comme valeur
+           // map.put("hi" + i,  fileMap); //WorldMap doit accepter un FileMap comme valeur
         }
 
     }
