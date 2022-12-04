@@ -1,5 +1,6 @@
 import java.util.*;
 
+//TODO: la valeur doit seulement accepter un FileMap, pas un integer
 /**
  * FileMap utilise une structure de données ChainHashMap.
  *
@@ -52,6 +53,13 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         capacity = 1000;
         table = new Entry[capacity];
     }
+
+
+
+    public int getCapacity() {
+        return capacity;
+    }
+
     @Override
     public int size() {
         return size;

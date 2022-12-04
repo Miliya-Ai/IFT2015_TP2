@@ -32,7 +32,7 @@
                 </configuration>
             </plugin>
         </plugins>
-        <testSourceDirectory>src/test</testSourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
 
     </build>
 

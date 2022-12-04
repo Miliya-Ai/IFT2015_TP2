@@ -26,6 +26,15 @@ public class FileMap<K,V> implements Map<K,V>{
     public FileMap( int cap ) { this( cap, 109345121 ); } //appel le premier constructeur
     public FileMap() { this( 11 ); } //appel le deuxieme constructeur
 
+    public Entry<K, V>[] getTable() {
+        return table;
+    }
+
+
+    public int getCapacity() {
+        return capacity;
+    }
+
     /**
      * Des le depart, la table a toutes des entry qui sont null
      */
@@ -229,12 +238,12 @@ public class FileMap<K,V> implements Map<K,V>{
                     continue;
                 } else {
                     Entry bucket = table[i];
-                    while (bucket.getNext() != null) {
+                    //while (bucket.getNext() != null) {
 
                             keySet.add((K) bucket.getKey());
 
-                        bucket = bucket.getNext();
-                    }
+                      //  bucket = bucket.getNext();
+                    //}
 
 
                    // keySet.add((K) bucket.getKey());
@@ -328,11 +337,14 @@ public class FileMap<K,V> implements Map<K,V>{
     }
     public static void main(String[] args) throws Exception {
         FileMap foo = new FileMap();
-
+/*
         for (int i=0; i<20; i++){
             foo.put("hi" + i,  1);
 
         }
+ */
+
+
         //System.out.println(foo.values());
         System.out.println(foo.size());
         System.out.println(foo.keySet());
