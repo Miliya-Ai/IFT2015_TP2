@@ -1,6 +1,6 @@
 import java.util.*;
 
-//TODO: la valeur doit seulement accepter un FileMap, pas un integer
+//TODO: WorldMap doit seulement accepter un FileMap comme valeur , pas un integer
 /**
  * FileMap utilise une structure de données ChainHashMap.
  *
