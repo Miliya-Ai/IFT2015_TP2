@@ -8,12 +8,11 @@ import java.util.Set;
 
 
 class FileMapTest {
-    private static FileMap fileMap;
-
+    static FileMap fileMap;
     @BeforeAll
     @DisplayName("Instanciation")
     static void instanciate(){
-        fileMap = new FileMap<>();
+        fileMap= new FileMap<>();
         assertEquals(0, fileMap.size(), "A l'instanciation, size != 0 ");
         assertEquals(11, fileMap.getCapacity(), "A l'instanciation, capacity != 0");
 
@@ -26,8 +25,12 @@ class FileMapTest {
 
     @Test
     void size() {
+        assertEquals(0, fileMap.size());
+        fileMap.put("gg", 4);
+        assertEquals(1, fileMap.size());
+
         initializeElem();
-        assertEquals(20, fileMap.size());
+        assertEquals(21, fileMap.size());
     }
 
     @Test
@@ -92,6 +95,11 @@ class FileMapTest {
         fileMap.put("gg", 4);
         fileMap.clear();
         assertEquals(0, fileMap.size());
+
+        initializeElem();
+        fileMap.clear();
+
+        assertEquals(0, fileMap.size());
     }
 
     @Test
@@ -112,6 +120,36 @@ class FileMapTest {
         initializeElem();
         assertEquals(20, fileMap.entrySet().size());
     }
+   /*
+    @Test
+    static void resize() {
+        for (int i=0; i<8; i++){
+            fileMap.put("hi" + i,  1);
+
+        }
+
+        int newCapacity = (2* fileMap.capacity) + 1;
+
+        fileMap.put("good", 5);
+
+        assertEquals(newCapacity, fileMap.getCapacity(),"Après avoir ajouté 8 entries, capacity != " + newCapacity );
+        //assertEquals(9, fileMap.size(), "Après avoir ajouté 9 entries, size != 9");
+    }
+
+    */
+
+    @Test
+    void isAboveLoadFactor() {
+        fileMap.put("l", 7);
+        assertFalse(fileMap.isAboveLoadFactor());
+        fileMap.remove("l");
+
+        for (int i=0; i<8; i++){
+            fileMap.put("hi" + i,  1);
+
+        }
+        assertFalse(fileMap.isAboveLoadFactor());
+    }
 
     public void initializeElem(){
         for (int i=0; i<20; i++){
@@ -119,4 +157,8 @@ class FileMapTest {
         }
 
     }
+
+
+
+
 }

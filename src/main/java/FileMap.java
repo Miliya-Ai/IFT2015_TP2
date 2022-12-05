@@ -14,6 +14,8 @@ public class FileMap<K,V> implements Map<K,V>{
     private int prime; // prime factor
     private long scale, shift; // shift and scale factors
     int modCount;
+    final double maxLoadFactor = 0.75;
+    final int originalCapacity = 11;
 
     // TODO: verifier les cas exceptionnels propres a fileMap
     public FileMap(int capacity, int prime) {
@@ -170,7 +172,7 @@ public class FileMap<K,V> implements Map<K,V>{
             return null;
         } else {
             Entry bucket = table[bucketIndex];
-            while (bucket != null && bucket.getKey() != key) {
+            while (bucket != null && (!(bucket.getKey().equals(key)))) {
                  bucket = bucket.getNext();
             }
             if (bucket == null){ //l'index contient un bucket, mais ce bucket ne contient pas la cle
@@ -190,6 +192,7 @@ public class FileMap<K,V> implements Map<K,V>{
         if (table[bucketIndex] == null){
             table[bucketIndex] = new Entry(key, value);
             buckets ++;
+            resize();
             return null;
 
         } else {
@@ -197,15 +200,18 @@ public class FileMap<K,V> implements Map<K,V>{
             while (bucket.getNext() != null && bucket.getKey() != key)
                 bucket = bucket.getNext();
 
-            if (bucket.getKey() == key)
+            if (bucket.getKey().equals(key))
                  return (V) bucket.setValue(value); // return l'ancienne valeur de la cle, null s'il en avait pas
              else {
                 bucket.setNext(new Entry(key,value));
                 buckets ++;
+                resize();
+
                 return null;
 
             }
         }
+
 
     }
     @Override
@@ -213,15 +219,19 @@ public class FileMap<K,V> implements Map<K,V>{
         if (!(key instanceof String)){
             throw new ClassCastException("La cle doit etre un String, le nom du fichier.");
         }
+
+
         int bucketIndex = hashValue(key);
+
         if (table[bucketIndex] != null){
             Entry prevEntry = null;
             Entry bucket = table[bucketIndex];
-            while (bucket.getNext() != null && bucket.getKey() != key) {
+            while (bucket.getNext() != null && (!(bucket.getKey().equals(key)))) {
                 prevEntry = bucket;
+
                 bucket = bucket.getNext();
             }
-            if (bucket.getKey() == key){
+            if (bucket.getKey().equals(key)){
                 if (prevEntry == null){ //le bucket contient seulement cette cle
                     table[bucketIndex] = bucket.getNext();
                     buckets --;
@@ -238,11 +248,14 @@ public class FileMap<K,V> implements Map<K,V>{
         } else {
             return null;
         }
+
+
     }
 
     @Override
     public void putAll(Map<? extends K,? extends V> m) {}
 
+    //TODO: remettre a la capacity initial pour clear?
     @Override
     public void clear() {
         if (buckets != 0 ) {
@@ -339,6 +352,59 @@ public class FileMap<K,V> implements Map<K,V>{
         }
         return entrySet;
     }
+
+
+
+    public void resize(){
+        if (isAboveLoadFactor()){
+            FileMap.Entry[] oldTable = table;
+            int newCapacity = (2* this.capacity) + 1;
+            FileMap.Entry[] newTable = new Entry[newCapacity];
+            for (int i = 0; i < newTable.length; i++)
+                newTable[i] = null;
+            int bucketIndex;
+
+            for (int i = 0; i < oldTable.length ; i++){
+                for (FileMap.Entry e = oldTable[i]; e != null ; e = e.next) {
+                    bucketIndex = hashValue(e.getKey());
+                    if (newTable[bucketIndex] == null){
+                        newTable[bucketIndex] = new Entry(e.getKey(), e.getValue());
+
+                    } else {
+                        Entry bucket = newTable[bucketIndex];
+                        while (bucket.getNext() != null && (!(bucket.getKey().equals(e.getKey()))))
+                            bucket = bucket.getNext();
+
+                        if (bucket.getKey().equals(e.getKey()))
+                            bucket.setValue(e.getValue()); // return l'ancienne valeur de la cle, null s'il en avait pas
+                        else {
+                            bucket.setNext(new Entry(e.getKey(),e.getValue()));
+
+                        }
+                    }
+                }
+            }
+
+            this.capacity = newCapacity;
+            table = newTable;
+        }
+
+
+
+    }
+
+
+
+    /**
+     *
+     * @return true si FileMap depasse le maxLoadFactor
+     */
+    public boolean isAboveLoadFactor(){
+        double loadFactor = ( ((double)size()) / this.capacity);
+        double roundOff = Math.round( loadFactor * 100.0) / 100.0; // https://stackoverflow.com/questions/11701399/round-up-to-2-decimal-places-in-java
+        return (roundOff > maxLoadFactor);
+    }
+
 
     /**
      * Chaque bucket est un linkedList, une idee inspiree de la documention HashMap qui utilise un chainage separe
