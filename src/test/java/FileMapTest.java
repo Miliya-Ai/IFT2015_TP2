@@ -12,7 +12,7 @@ class FileMapTest {
     @BeforeAll
     @DisplayName("Instanciation")
     static void instanciate(){
-        fileMap= new FileMap<>();
+        fileMap= new FileMap();
         assertEquals(0, fileMap.size(), "A l'instanciation, size != 0 ");
         assertEquals(11, fileMap.getCapacity(), "A l'instanciation, capacity != 0");
 
