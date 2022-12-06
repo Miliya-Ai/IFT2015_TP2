@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WordMapTest {
-    static WordMap<String,Integer> map;
+    static WordMap map;
 
     @BeforeAll
     @DisplayName("Instanciation")
     static void instanciate(){
-        map = new WordMap<>();
+        map = new WordMap();
         assertEquals(10, map.size(), "A l'instanciation, size != 10 ");
         assertEquals(1000, map.getCapacity(), "A l'instanciation, capacity != 1000");
 
