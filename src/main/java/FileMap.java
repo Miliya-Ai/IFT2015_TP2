@@ -33,6 +33,13 @@ public class FileMap implements Map{
         return table;
     }
 
+    static int hash(int h) {
+        // This function ensures that hashCodes that differ only by
+        // constant multiples at each bit position have a bounded
+        // number of collisions (approximately 8 at default load factor).
+        h ^= (h >>> 20) ^ (h >>> 12);
+        return h ^ (h >>> 7) ^ (h >>> 4);
+    }
 
     public int getCapacity() {
         return capacity;
@@ -56,6 +63,9 @@ public class FileMap implements Map{
         return (int)( ( Math.abs( key.hashCode() * scale + shift ) % prime ) % capacity );
     }
 
+    static int indexFor(int h, int length) {
+        return h & (length-1);
+    }
     /**
      *
      * @return le nombre de Entry de FileMap
@@ -82,38 +92,18 @@ public class FileMap implements Map{
             throw new ClassCastException("La cle doit etre un String, le nom du fichier");
         }
         return getEntry(key) != null;
-/*
 
-
-        if (size() == 0){
-            return false;
-        }
-
-        if (table[bucketIndex] == null){
-            return false;
-        } else {
-            Entry bucket = table[bucketIndex];
-            while (bucket.getNext() != null){
-                if (bucket.getKey() == key){
-                    return true;
-                }
-                bucket = bucket.getNext();
-            }
-
-        }
-        return false;
-
- */
 
     }
     final FileMap.Entry getEntry(Object key) {
-        int bucketIndex = hashValue(key);
+        int hash = (key == null) ? 0 : hash(key.hashCode());
 
-        for (FileMap.Entry e = table[bucketIndex];
+        for (FileMap.Entry e = table[indexFor(hash, table.length)];
              e != null;
              e = e.next) {
             Object k;
-            if (((k = e.key) == key || (key != null && key.equals(k))))
+            if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k))))
                 return e;
         }
         return null;
@@ -134,52 +124,37 @@ public class FileMap implements Map{
         if (size() == 0){
             return false;
         }
-        /*
-        for (int bucketIndex = 0 ; bucketIndex< capacity; bucketIndex++){
-            if (table[bucketIndex] == null){
-                continue;
-            } else {
-                Entry bucket = table[bucketIndex];
-                while (bucket.getNext() != null) {
-                    if (bucket.containSpecificValue(value)) {
-                        return true;
-                    }
-                    bucket = bucket.getNext();
-                }
 
-
-            }
-        }
-        return false;
-
-         */
         FileMap.Entry[] tab = table;
         for (int i = 0; i < tab.length ; i++)
             for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
-                if (value.equals(e.value))
+                if (e.containSpecificValue(value))
                     return true;
         return false;
     }
 
     @Override
     public Object get(Object key) throws ClassCastException {
-        int bucketIndex = hashValue(key);
         if (!(key instanceof String)){
             throw new ClassCastException("La cle doit etre un String, le nom du fichier");
         }
-        // la cle ne se trouve pas dans le FileMap
-        if (table[bucketIndex] == null){
-            return null;
-        } else {
-            Entry bucket = table[bucketIndex];
-            while (bucket != null && (!(bucket.getKey().equals(key)))) {
-                 bucket = bucket.getNext();
-            }
-            if (bucket == null){ //l'index contient un bucket, mais ce bucket ne contient pas la cle
-                return null;
-            } else {
-                return bucket.getValue();
-            }
+        int hash = hash(key.hashCode());
+        for (Entry e = table[indexFor(hash, table.length)];
+            e != null;
+            e = e.next) {
+            Object k;
+            if ( e.hash == hash && ((k = e.key) == key ||key.equals(k)))
+                return e.value;
+        }
+        return null;
+    }
+
+    void addEntry(int hash, Object key, Object value, int bucketIndex) {
+        FileMap.Entry e = table[bucketIndex];
+        table[bucketIndex] = new FileMap.Entry(hash, key, value, e);
+        buckets++;
+        if (isAboveLoadFactor()){
+            resize();
         }
     }
     @Override
@@ -188,67 +163,52 @@ public class FileMap implements Map{
             throw new ClassCastException("La cle doit etre un string, le nom d'un fichier. " +
                                         "La valeur doit etre un int, la position du mot dans ce fichier.");
         }
-        int bucketIndex = hashValue(key);
-        if (table[bucketIndex] == null){
-            table[bucketIndex] = new Entry(key, value);
-            buckets ++;
-            resize();
-            return null;
 
-        } else {
-            Entry bucket = table[bucketIndex];
-            while (bucket.getNext() != null && bucket.getKey() != key)
-                bucket = bucket.getNext();
-
-            if (bucket.getKey().equals(key))
-                 return bucket.setValue(value); // return l'ancienne valeur de la cle, null s'il en avait pas
-             else {
-                bucket.setNext(new Entry(key,value));
-                buckets ++;
-                resize();
-
-                return null;
-
+        int hash = hash(key.hashCode());
+        int i = indexFor(hash, table.length);
+        for (FileMap.Entry e = table[i]; e != null; e = e.next) {
+            Object k;
+            if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
+                return e.setValue(value);
             }
         }
+        addEntry(hash, key, value, i);
 
+        return null;
 
+    }
+    final FileMap.Entry removeEntryForKey(Object key) {
+        int hash = (key == null) ? 0 : hash(key.hashCode());
+        int i = indexFor(hash, table.length);
+        FileMap.Entry prev = table[i];
+        FileMap.Entry e = prev;
+
+        while (e != null) {
+            FileMap.Entry next = e.next;
+            Object k;
+            if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k)))) {
+
+                buckets--;
+                if (prev == e)
+                    table[i] = next;
+                else
+                    prev.next = next;
+                return e;
+            }
+            prev = e;
+            e = next;
+        }
+
+        return e;
     }
     @Override
     public Object remove(Object key) throws ClassCastException {
         if (!(key instanceof String)){
             throw new ClassCastException("La cle doit etre un String, le nom du fichier.");
         }
-
-
-        int bucketIndex = hashValue(key);
-
-        if (table[bucketIndex] != null){
-            Entry prevEntry = null;
-            Entry bucket = table[bucketIndex];
-            while (bucket.getNext() != null && (!(bucket.getKey().equals(key)))) {
-                prevEntry = bucket;
-
-                bucket = bucket.getNext();
-            }
-            if (bucket.getKey().equals(key)){
-                if (prevEntry == null){ //le bucket contient seulement cette cle
-                    table[bucketIndex] = bucket.getNext();
-                    buckets --;
-                    return bucket.getValue();
-                } else { //le bucket enleve le pointeur vers cette cle du bucket
-                    prevEntry.setNext(bucket.getNext());
-                    buckets --;
-                    return bucket.getValue();
-                }
-
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-
+        FileMap.Entry e = removeEntryForKey(key);
+        return (e == null ? null : e.value);
 
     }
 
@@ -275,25 +235,7 @@ public class FileMap implements Map{
             for (int i = 0; i < tab.length ; i++)
                 for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
                     keySet.add(e.getKey());
-
-/*
-            for (int i = 0; i < capacity; i++){
-                if (table[i] == null) {
-                    continue;
-                } else {
-                    Entry bucket = table[i];
-                    //while (bucket.getNext() != null) {
-
-                            keySet.add((K) bucket.getKey());
-
-                      //  bucket = bucket.getNext();
-                    //}
-
-
-                   // keySet.add((K) bucket.getKey());
-                }
-            }
-  */
+            
         }
 
 
@@ -354,40 +296,33 @@ public class FileMap implements Map{
     }
 
 
+    void transfer(FileMap.Entry[] newTable) {
+        FileMap.Entry[] src = table;
+        int newCapacity = newTable.length;
+        for (int j = 0; j < src.length; j++) {
+            FileMap.Entry e = src[j];
+            if (e != null) {
+                src[j] = null;
+                do {
+                    FileMap.Entry next = e.next;
+                    int i = indexFor(e.hash, newCapacity);
+                    e.next = newTable[i];
+                    newTable[i] = e;
+                    e = next;
+                } while (e != null);
+            }
+        }
+    }
 
     public void resize(){
-        if (isAboveLoadFactor()){
-            FileMap.Entry[] oldTable = table;
-            int newCapacity = (2* this.capacity) + 1;
-            FileMap.Entry[] newTable = new Entry[newCapacity];
-            for (int i = 0; i < newTable.length; i++)
-                newTable[i] = null;
-            int bucketIndex;
+        FileMap.Entry[] oldTable = table;
+        int newCapacity = (2* this.capacity) + 1;
+        FileMap.Entry[] newTable = new Entry[newCapacity];
+        transfer(newTable);
 
-            for (int i = 0; i < oldTable.length ; i++){
-                for (FileMap.Entry e = oldTable[i]; e != null ; e = e.next) {
-                    bucketIndex = hashValue(e.getKey());
-                    if (newTable[bucketIndex] == null){
-                        newTable[bucketIndex] = new Entry(e.getKey(), e.getValue());
+        this.capacity = newCapacity;
+        table = newTable;
 
-                    } else {
-                        Entry bucket = newTable[bucketIndex];
-                        while (bucket.getNext() != null && (!(bucket.getKey().equals(e.getKey()))))
-                            bucket = bucket.getNext();
-
-                        if (bucket.getKey().equals(e.getKey()))
-                            bucket.setValue(e.getValue()); // return l'ancienne valeur de la cle, null s'il en avait pas
-                        else {
-                            bucket.setNext(new Entry(e.getKey(),e.getValue()));
-
-                        }
-                    }
-                }
-            }
-
-            this.capacity = newCapacity;
-            table = newTable;
-        }
 
 
 
@@ -418,12 +353,15 @@ public class FileMap implements Map{
         private K key; // for the key
         private ArrayList value = new ArrayList(); // for the value
         private Entry next;
+        final int hash;
 
 
-        public Entry( K key, V value ) {
+        public Entry(int h, K key, V value, Entry n ) {
             this.key = key;
             this.value.add(value);
-            this.next = null;
+            this.next = n;
+            this.hash = h;
+
         }
         // getters
         public K getKey() { return this.key; }
@@ -449,7 +387,10 @@ public class FileMap implements Map{
 
         public String toString() { return "<" + this.getKey() + ":" + this.getValue() + ">"; }
 
-
+        public final int hashCode() {
+            return (key==null   ? 0 : key.hashCode()) ^
+                    (value==null ? 0 : value.hashCode());
+        }
     }
 
     private abstract class FileMapIterator<E> implements Iterator<E> {
@@ -528,6 +469,7 @@ public class FileMap implements Map{
 
 
         System.out.println(foo.containsKey("hi16"));
+
         System.out.println(foo.size());
         System.out.println(foo.keySet());
         System.out.println(foo.values());
