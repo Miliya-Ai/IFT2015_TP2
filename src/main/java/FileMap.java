@@ -4,11 +4,11 @@ import java.util.*;
  * FileMap utilise une structure de données ChainHashMap.
  *
  * Code inspire du prof, https://www.algolist.net/Data_structures/Hash_table/Chaining et du hashMap de java
- *  cle : noms des fichiers
- *  valeur : positions du mot dans le fichier correspondant storer dans un arrayList
+ * @param <K> cle : noms des fichiers
+ * @param <V> valeur : positions du mot dans le fichier correspondant storer dans un arrayList
  */
-public class FileMap implements Map{
-    private Entry[] table;
+public class FileMap<K,V> implements Map<K,V>{
+    private Entry<K, V>[] table;
     private int buckets = 0; // le nombre de buckets
     protected int capacity; // size of the table
     private int prime; // prime factor
@@ -29,7 +29,7 @@ public class FileMap implements Map{
     public FileMap( int cap ) { this( cap, 109345121 ); } //appel le premier constructeur
     public FileMap() { this( 11 ); } //appel le deuxieme constructeur
 
-    public Entry[] getTable() {
+    public Entry<K, V>[] getTable() {
         return table;
     }
 
@@ -106,10 +106,10 @@ public class FileMap implements Map{
  */
 
     }
-    final FileMap.Entry getEntry(Object key) {
+    final FileMap.Entry<K,V> getEntry(Object key) {
         int bucketIndex = hashValue(key);
 
-        for (FileMap.Entry e = table[bucketIndex];
+        for (FileMap.Entry<K,V> e = table[bucketIndex];
              e != null;
              e = e.next) {
             Object k;
@@ -162,7 +162,7 @@ public class FileMap implements Map{
     }
 
     @Override
-    public Object get(Object key) throws ClassCastException {
+    public V get(Object key) throws ClassCastException {
         int bucketIndex = hashValue(key);
         if (!(key instanceof String)){
             throw new ClassCastException("La cle doit etre un String, le nom du fichier");
@@ -178,12 +178,12 @@ public class FileMap implements Map{
             if (bucket == null){ //l'index contient un bucket, mais ce bucket ne contient pas la cle
                 return null;
             } else {
-                return bucket.getValue();
+                return (V) bucket.getValue();
             }
         }
     }
     @Override
-    public Object put(Object key, Object value) throws ClassCastException {
+    public V put(K key, V value) throws ClassCastException {
         if (!((key instanceof String) && (value instanceof Integer))){
             throw new ClassCastException("La cle doit etre un string, le nom d'un fichier. " +
                                         "La valeur doit etre un int, la position du mot dans ce fichier.");
@@ -201,7 +201,7 @@ public class FileMap implements Map{
                 bucket = bucket.getNext();
 
             if (bucket.getKey().equals(key))
-                 return bucket.setValue(value); // return l'ancienne valeur de la cle, null s'il en avait pas
+                 return (V) bucket.setValue(value); // return l'ancienne valeur de la cle, null s'il en avait pas
              else {
                 bucket.setNext(new Entry(key,value));
                 buckets ++;
@@ -215,7 +215,7 @@ public class FileMap implements Map{
 
     }
     @Override
-    public Object remove(Object key) throws ClassCastException {
+    public V remove(Object key) throws ClassCastException {
         if (!(key instanceof String)){
             throw new ClassCastException("La cle doit etre un String, le nom du fichier.");
         }
@@ -235,11 +235,11 @@ public class FileMap implements Map{
                 if (prevEntry == null){ //le bucket contient seulement cette cle
                     table[bucketIndex] = bucket.getNext();
                     buckets --;
-                    return bucket.getValue();
+                    return (V) bucket.getValue();
                 } else { //le bucket enleve le pointeur vers cette cle du bucket
                     prevEntry.setNext(bucket.getNext());
                     buckets --;
-                    return bucket.getValue();
+                    return (V) bucket.getValue();
                 }
 
             } else {
@@ -253,7 +253,7 @@ public class FileMap implements Map{
     }
 
     @Override
-    public void putAll(Map m) {}
+    public void putAll(Map<? extends K,? extends V> m) {}
 
     //TODO: remettre a la capacity initial pour clear?
     @Override
@@ -267,14 +267,14 @@ public class FileMap implements Map{
     }
 
     @Override
-    public Set<Object> keySet() {
-        Set<Object> keySet = new HashSet<>();
+    public Set<K> keySet() {
+        Set<K> keySet = new HashSet<>();
 
         if (buckets != 0) {
             FileMap.Entry[] tab = table;
             for (int i = 0; i < tab.length ; i++)
                 for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
-                    keySet.add(e.getKey());
+                    keySet.add((K) e.getKey());
 
 /*
             for (int i = 0; i < capacity; i++){
@@ -301,15 +301,15 @@ public class FileMap implements Map{
     }
 
     @Override
-    public Collection values() {
+    public Collection<V> values() {
 
-        Collection values = new ArrayList<>();
+        Collection<V> values = new ArrayList<>();
 
         if (buckets != 0){
             FileMap.Entry[] tab = table;
             for (int i = 0; i < tab.length ; i++)
                 for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
-                    values.add(e.getValue());
+                    values.add((V) e.getValue());
             /*
             for (int i = 0; i < capacity; i++){
                 if (table[i] == null) {
@@ -331,8 +331,8 @@ public class FileMap implements Map{
         return values;
     }
     @Override
-    public Set<Map.Entry> entrySet() {
-        Set<Map.Entry> entrySet = new HashSet<>();
+    public Set<Map.Entry<K, V>> entrySet() {
+        Set<Map.Entry<K, V>> entrySet = new HashSet<>();
 
 
         if (buckets != 0) {
@@ -453,10 +453,10 @@ public class FileMap implements Map{
     }
 
     private abstract class FileMapIterator<E> implements Iterator<E> {
-        FileMap.Entry next;        // next entry to return
+        FileMap.Entry<K,V> next;        // next entry to return
         int expectedModCount;   // For fast-fail
         int index;              // current slot
-        FileMap.Entry current;     // current entry
+        FileMap.Entry<K,V> current;     // current entry
 
         void HashIterator() {
             expectedModCount = modCount;
@@ -471,10 +471,10 @@ public class FileMap implements Map{
             return next != null;
         }
 
-        final FileMap.Entry nextEntry() {
+        final FileMap.Entry<K,V> nextEntry() {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
-            FileMap.Entry e = next;
+            FileMap.Entry<K,V> e = next;
             if (e == null)
                 throw new NoSuchElementException();
 
@@ -490,32 +490,32 @@ public class FileMap implements Map{
 
     }
 
-    private final class ValueIterator extends FileMapIterator<Object> {
-        public Object next() {
-            return nextEntry().value;
+    private final class ValueIterator extends FileMapIterator<V> {
+        public V next() {
+            return (V) nextEntry().value;
         }
     }
 
-    private final class KeyIterator extends FileMapIterator<Object> {
-        public Object next() {
+    private final class KeyIterator extends FileMapIterator<K> {
+        public K next() {
             return nextEntry().getKey();
         }
     }
 
-    private final class EntryIterator extends FileMapIterator<Map.Entry> {
-        public FileMap.Entry next() {
+    private final class EntryIterator extends FileMapIterator<Map.Entry<K,V>> {
+        public Map.Entry<K,V> next() {
             return nextEntry();
         }
     }
 
     // Subclass overrides these to alter behavior of views' iterator() method
-    Iterator<Object> newKeyIterator()   {
+    Iterator<K> newKeyIterator()   {
         return new FileMap.KeyIterator();
     }
-    Iterator<Object> newValueIterator()   {
+    Iterator<V> newValueIterator()   {
         return new FileMap.ValueIterator();
     }
-    Iterator<Map.Entry> newEntryIterator()   {
+    Iterator<Map.Entry<K,V>> newEntryIterator()   {
         return new FileMap.EntryIterator();
     }
     public static void main(String[] args) throws Exception {

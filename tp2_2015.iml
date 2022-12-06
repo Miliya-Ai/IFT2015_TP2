@@ -12,7 +12,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" exported="">
+    <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="file://$MODULE_DIR$/../../UDEM/ift2015/tp2/stanford-corenlp-4.5.1/stanford-corenlp-4.5.1" />
@@ -35,5 +35,19 @@
     <orderEntry type="library" name="Maven: org.junit.jupiter:junit-jupiter-params:5.9.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.junit.jupiter:junit-jupiter-engine:5.9.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.junit.platform:junit-platform-engine:1.9.0" level="project" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="file://$USER_HOME$/Downloads/stanford-corenlp-4.5.1" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$USER_HOME$/Downloads/stanford-corenlp-4.5.1" />
+          <root url="file://$USER_HOME$/Downloads/stanford-corenlp-4.5.1" />
+        </SOURCES>
+        <jarDirectory url="file://$USER_HOME$/Downloads/stanford-corenlp-4.5.1" recursive="false" />
+        <jarDirectory url="file://$USER_HOME$/Downloads/stanford-corenlp-4.5.1" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
   </component>
 </module>
