@@ -1,9 +1,101 @@
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.objectbank.LineIterator;
 import edu.stanford.nlp.pipeline.*;
-import java.util.Properties;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
+import java.util.stream.Stream;
+
+// code inspiré de https://www.tutorialspoint.com/how-to-read-data-from-all-files-in-a-directory-using-java
 public class Preprocess {
 
+    private final String pathDataSet;
+    File directoryPath;
+    File filesList[];
+
+    //constructeur
+    public Preprocess(String pathDataSet){
+        this.pathDataSet = pathDataSet;
+        init();
+    }
+
+    public void init(){
+        directoryPath= new File(pathDataSet);
+        filesList = directoryPath.listFiles();
+
+        for(File file: filesList){
+            replacePonctuations();
+            nplTextProcession();
+        }
+
+
+    }
+
+    private void nplTextProcession() {
+        //TODO: use CORENLP pour traiter le texte
+    }
+
+    // code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java
+    private void replacePonctuations() {
+        try {
+            FileReader reader = new FileReader(pathDataSet);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                //TODO:
+                replaceBySingleSpace(line);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //TODO: changer l'argument si necessaire
+    private void replaceBySingleSpace(String line) {
+        try {
+            FileWriter writer = new FileWriter("MyFile.txt");
+            BufferedWriter bufferedWriter = new BufferedWriter(writer);
+
+            //TODO: if (mot w = ponctuation)
+            //          then space
+            //      if (mot w = plusierus spaces)
+            //          then 1 space
+            /*
+            bufferedWriter.write("Hello World");
+            bufferedWriter.newLine();
+            bufferedWriter.write("See You Again!");
+             */
+
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
+    //------------------------------------ GETTERS ------------------------------------------------//
+    public String getPathDataSet() {
+        return pathDataSet;
+    }
+
+    public File getDirectoryPath() {
+        return directoryPath;
+    }
+
+    public File[] getFilesList() {
+        return filesList;
+    }
+    /*
     public static String text = "Joe Smith wasn't born in California. " +
             "In 2017, he went to his car, sister's car Paris, France in the summer. " +
             "His flight left at 3:00pm on July 10th, 2017. " +
@@ -29,5 +121,7 @@ public class Preprocess {
             System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
         }
     }
+
+ */
 
 }

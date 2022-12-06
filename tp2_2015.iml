@@ -47,6 +47,7 @@
         </SOURCES>
         <jarDirectory url="file://$USER_HOME$/Downloads/stanford-corenlp-4.5.1" recursive="false" />
         <jarDirectory url="file://$USER_HOME$/Downloads/stanford-corenlp-4.5.1" recursive="false" type="SOURCES" />
+        <jarDirectory url="file://$USER_HOME$/Downloads/stanford-corenlp-4.5.1" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
   </component>
