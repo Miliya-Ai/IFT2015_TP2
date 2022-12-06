@@ -1,25 +1,31 @@
 import java.util.*;
 
 //TODO: WorldMap doit seulement accepter un FileMap comme valeur , pas un integer
-/**
- * FileMap utilise une structure de données ChainHashMap.
- *
- * Code inspire de https://github.com/openjdk-mirror/jdk7u-jdk/blob/master/src/share/classes/java/util/HashMap.java#L163 et https://www.youtube.com/watch?v=s37Gy5N7oio&list=PLNDWoTOY5hTYtr3IuGo1K7F-8K9DpSuD_&index=23
- * @param <K> cle : noms des fichiers
- * @param <V> valeur : positions du mot dans le fichier correspondant storer dans un arrayList
- */
-public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
+
+public class WordMap implements Map {
     private  static  class  Entry<K,V> {
-        private K key;
-        private V value;
-        Entry<K,V> next;
+        private Object key;
+        private Object value;
+        Entry<Object,Object> next;
         int hash;
-        public Entry(K key, V value){
+        public Entry(Object key, Object value){
             this.key = key;
             this.value = value;
         }
 
-        public void recordRemoval(WordMap<K, V> kvWordMap) {
+        public void recordRemoval(WordMap kvWordMap) {
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public void setValue(Object value) {
+            this.value = value;
+        }
+
+        public Object getKey() {
+            return key;
         }
     }
 
@@ -27,11 +33,11 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     private int size;
     private int capacity;
     private int numDeleted;
-    transient volatile Set<K>        keySet = null;
-    transient volatile Collection<V> values = null;
-    private transient Set<Map.Entry<K,V>> entrySet = null;
+    transient volatile Set<Object>        keySet = null;
+    transient volatile Collection<Object> values = null;
+    private transient Set<Entry> entrySet = null;
 
-    private Entry<K,V>[] table;
+    private Entry<Object,Object>[] table;
     /**
      * The next size value at which to resize (capacity * load factor).
      * @serial
@@ -46,7 +52,7 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
      */
     transient int modCount;
     public  static final double Max_LOAD = 0.75;
-    private  final Entry<K,V> DELETED = new Entry(null,null);
+    private  final Entry<Object,Object> DELETED = new Entry(null,null);
 
     public WordMap(){
         size = 10;
@@ -124,11 +130,11 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
      * HashMap.  Returns null if the HashMap contains no mapping
      * for the key.
      */
-    final Entry<K,V> getEntry(Object key) {
+    final Entry<Object,Object> getEntry(Object key) {
         int hash = (key == null) ? 0 : hash(key.hashCode());
-        for (Entry<K,V> e = table[indexFor(hash, table.length)];
+        for (Entry<Object,Object> e = table[indexFor(hash, table.length)];
              e != null;
-             e = e.next) {
+             e = (Entry<Object, Object>) e.next) {
             Object k;
             if (e.hash == hash &&
                     ((k = e.key) == key || (key != null && key.equals(k))))
@@ -149,7 +155,7 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         return false;
     }
     @Override
-    public V get(Object key) {
+    public Object get(Object key) {
         int index = key.hashCode() % capacity;
         while (true){
             if(table[index] == null){
@@ -163,7 +169,7 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     }
 
     @Override
-    public V put(K key, V value) {
+    public Object put(Object key, Object value) {
         if (key == null){
             return null;
         }
@@ -173,11 +179,11 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                 if(1.0*size/capacity >= Max_LOAD ){
                     rehash();
                 }
-                table[index] = new Entry<K, V>(key, value);
+                table[index] = (Entry<Object, Object>) new Entry<Object, Object>(key, value);
                 size++;
                 return null;
             }else if (key.equals(table[index].key)){
-                V old = table[index].value;
+                Object old = table[index].value;
                 table[index].value = value;
                 return old;
             } else {
@@ -197,8 +203,8 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
             if(oldTable[i] == null){
                 continue;
             }
-            K key = (K) oldTable[i].key;
-            V value = (V) oldTable[i].value;
+            Object key =  oldTable[i].key;
+            Object value = oldTable[i].value;
             this.put(key,value);
 
         }
@@ -207,13 +213,13 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
 
     @Override
-    public V remove(Object key) {
+    public Object remove(Object key) {
         int index = key.hashCode() % capacity;
         while (true){
             if(table[index] == null ){
                 return null;
             }else if (key.equals(table[index].key)){
-                V old = table[index].value;
+                Object old = table[index].value;
                 table[index] = DELETED;
                 size--;
                 numDeleted++;
@@ -232,7 +238,7 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
      * @param m mappings to be stored in this map
      * @throws NullPointerException if the specified map is null
      */
-    public void putAll(Map<? extends K, ? extends V> m) {
+    public void putAll(Map m) {
         int numKeysToBeAdded = m.size();
         if (numKeysToBeAdded == 0)
             return;
@@ -247,8 +253,6 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                 rehash();
         }
 
-        for (Map.Entry<? extends K, ? extends V> e : m.entrySet())
-            put(e.getKey(), e.getValue());
     }
 
     public String toString(){
@@ -286,10 +290,10 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     }
 
     private abstract class HashIterator<E> implements Iterator<E> {
-        Entry<K,V> next;        // next entry to return
+        Entry<Object,Object> next;        // next entry to return
         int expectedModCount;   // For fast-fail
         int index;              // current slot
-        Entry<K,V> current;     // current entry
+        Entry<Object,Object> current;     // current entry
 
         HashIterator() {
             expectedModCount = modCount;
@@ -303,18 +307,18 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
 
     @Override
-    public Set<K> keySet() {
+    public Set<Object> keySet() {
         if (keySet == null) {
-            keySet = new AbstractSet<K>() {
-                public Iterator<K> iterator() {
-                    return new Iterator<K>() {
-                        private Iterator<Map.Entry<K,V>> i = entrySet().iterator();
+            keySet = new AbstractSet<Object>() {
+                public Iterator<Object> iterator() {
+                    return new Iterator<Object>() {
+                        private Iterator<Entry> i = entrySet().iterator();
 
                         public boolean hasNext() {
                             return i.hasNext();
                         }
 
-                        public K next() {
+                        public Object next() {
                             return i.next().getKey();
                         }
 
@@ -341,23 +345,23 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                 }
             };
         }
-        return keySet;
+        return (Set<Object>) keySet;
     }
 
 
     @Override
-    public Collection<V> values() {
+    public Collection values() {
         if (values == null) {
-            values = new AbstractCollection<V>() {
-                public Iterator<V> iterator() {
-                    return new Iterator<V>() {
-                        private Iterator<Map.Entry<K,V>> i = entrySet().iterator();
+            values = new AbstractCollection<Object>() {
+                public Iterator<Object> iterator() {
+                    return new Iterator<Object>() {
+                        private Iterator<Entry> i = entrySet().iterator();
 
                         public boolean hasNext() {
                             return i.hasNext();
                         }
 
-                        public V next() {
+                        public Object next() {
                             return i.next().getValue();
                         }
 
@@ -386,29 +390,25 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         }
         return values;
     }
-    @Override
-    public Set<Map.Entry<K,V>> entrySet() {
-        return entrySet0();
-    }
 
-    private Set<Map.Entry<K,V>> entrySet0() {
-        Set<Map.Entry<K,V>> es = entrySet;
+    public Set<Entry> entrySet() {
+        Set<Entry> es = entrySet;
         return es != null ? es : (entrySet);
     }
     
-    final Entry<K,V> removeMapping(Object o) {
+    final Entry<Object,Object> removeMapping(Object o) {
         if (!(o instanceof Map.Entry))
             return null;
 
-        Map.Entry<K,V> entry = (Map.Entry<K,V>) o;
+        Map.Entry<Object,Object> entry = (Map.Entry<Object,Object>) o;
         Object key = entry.getKey();
         int hash = (key == null) ? 0 : hash(key.hashCode());
         int i = indexFor(hash, table.length);
-        Entry<K,V> prev = table[i];
-        Entry<K,V> e = prev;
+        Entry<Object,Object> prev = table[i];
+        Entry<Object,Object> e = prev;
 
         while (e != null) {
-            Entry<K,V> next = e.next;
+            Entry<Object,Object> next = e.next;
             if (e.hash == hash && e.equals(entry)) {
                 modCount++;
                 size--;
@@ -416,7 +416,7 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                     table[i] = next;
                 else
                     prev.next = next;
-                e.recordRemoval(this);
+                e.recordRemoval((WordMap) this);
                 return e;
             }
             prev = e;
@@ -430,8 +430,8 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
-            Map.Entry<K,V> e = (Map.Entry<K,V>) o;
-            Entry<K,V> candidate = getEntry(e.getKey());
+            Map.Entry<Object,Object> e = (Map.Entry<Object,Object>) o;
+            Entry<Object,Object> candidate = getEntry(e.getKey());
             return candidate != null && candidate.equals(e);
         }
         public boolean remove(Object o) {
@@ -446,7 +446,7 @@ public class WordMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     }
 
     public static void main(String[] args){
-        WordMap<String,Integer> map = new WordMap<>();
+        WordMap map = new WordMap();
 
         for(int i = 0; i < 5; i++){
             map.put((char)('a')+"ello", i);
