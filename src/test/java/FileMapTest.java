@@ -8,10 +8,10 @@ import java.util.Set;
 
 
 class FileMapTest {
-    static FileMap fileMap;
-    @BeforeAll
+    FileMap fileMap;
+    @BeforeEach
     @DisplayName("Instanciation")
-    static void instanciate(){
+    void instanciate(){
         fileMap= new FileMap();
         assertEquals(0, fileMap.size(), "A l'instanciation, size != 0 ");
         assertEquals(11, fileMap.getCapacity(), "A l'instanciation, capacity != 0");
@@ -56,12 +56,14 @@ class FileMapTest {
     void containsValue() {
         initializeElem();
         fileMap.put("yo", 50);
-        assertTrue(fileMap.containsKey("yo"), "Doit etre true");
+        assertTrue(fileMap.containsValue(50), "Doit etre true");
 
     }
 
     @Test
     void get() {
+
+
         ArrayList<Integer> oneElem =  new ArrayList<>();
         oneElem.add(1);
         initializeElem();
@@ -82,6 +84,7 @@ class FileMapTest {
     @Test
     void remove() {
         initializeElem();
+
         ArrayList<Integer> oneElem = new ArrayList<>();
         oneElem.add(1);
         assertEquals(oneElem, fileMap.remove("hi17"));
@@ -120,9 +123,9 @@ class FileMapTest {
         initializeElem();
         assertEquals(20, fileMap.entrySet().size());
     }
-   /*
+
     @Test
-    static void resize() {
+    void resize() {
         for (int i=0; i<8; i++){
             fileMap.put("hi" + i,  1);
 
@@ -133,10 +136,10 @@ class FileMapTest {
         fileMap.put("good", 5);
 
         assertEquals(newCapacity, fileMap.getCapacity(),"Après avoir ajouté 8 entries, capacity != " + newCapacity );
-        //assertEquals(9, fileMap.size(), "Après avoir ajouté 9 entries, size != 9");
+        assertEquals(9, fileMap.size(), "Après avoir ajouté 9 entries, size != 9");
     }
 
-    */
+
 
     @Test
     void isAboveLoadFactor() {
@@ -148,6 +151,7 @@ class FileMapTest {
             fileMap.put("hi" + i,  1);
 
         }
+
         assertFalse(fileMap.isAboveLoadFactor());
     }
 
