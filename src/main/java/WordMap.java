@@ -1,95 +1,463 @@
+import java.io.*;
 import java.util.*;
 
-//TODO: WorldMap doit seulement accepter un FileMap comme valeur , pas un integer
 
 public class WordMap implements Map {
-    private  static  class  Entry<K,V> {
-        private Object key;
-        private Object value;
-        Entry<Object,Object> next;
-        int hash;
-        public Entry(Object key, Object value){
-            this.key = key;
-            this.value = value;
-        }
 
-        public void recordRemoval(WordMap kvWordMap) {
-        }
+    /**
+     * The default initial capacity - MUST be a power of two.
+     */
+    static final int DEFAULT_INITIAL_CAPACITY = 16;
 
-        public Object getValue() {
-            return value;
-        }
+    /**
+     * The maximum capacity, used if a higher value is implicitly specified
+     * by either of the constructors with arguments.
+     * MUST be a power of two <= 1<<30.
+     */
+    static final int MAXIMUM_CAPACITY = 1 << 30;
 
-        public void setValue(Object value) {
-            this.value = value;
-        }
+    /**
+     * The load factor used when none specified in constructor.
+     */
+    static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
-        public Object getKey() {
-            return key;
-        }
-    }
+    /**
+     * The table, resized as necessary. Length MUST Always be a power of two.
+     */
+    transient Entry[] table;
 
+    /**
+     * The number of key-value mappings contained in this map.
+     */
+    transient int size;
 
-    private int size;
-    private int capacity;
-    private int numDeleted;
-    transient volatile Set<Object>        keySet = null;
-    transient volatile Collection<Object> values = null;
-    private transient Set<Entry> entrySet = null;
-
-    private Entry<Object,Object>[] table;
     /**
      * The next size value at which to resize (capacity * load factor).
      * @serial
      */
     int threshold;
+
     /**
-     * The number of times this HashMap has been structurally modified
+     * The load factor for the hash table.
+     *
+     * @serial
+     */
+    final float loadFactor;
+
+    /**
+     * The number of times this WordMap has been structurally modified
      * Structural modifications are those that change the number of mappings in
-     * the HashMap or otherwise modify its internal structure (e.g.,
+     * the WordMap or otherwise modify its internal structure (e.g.,
      * rehash).  This field is used to make iterators on Collection-views of
-     * the HashMap fail-fast.  (See ConcurrentModificationException).
+     * the WordMap fail-fast.  (See ConcurrentModificationException).
      */
     transient int modCount;
-    public  static final double Max_LOAD = 0.75;
-    private  final Entry<Object,Object> DELETED = new Entry(null,null);
+    transient volatile Set<Object> keySet = null;
+    transient volatile Collection<Object> values = null;
 
-    public WordMap(){
-        size = 10;
-        capacity = 1000;
+    /**
+     * Constructs an empty <tt>WordMap</tt> with the specified initial
+     * capacity and load factor.
+     *
+     * @param  initialCapacity the initial capacity
+     * @param  loadFactor      the load factor
+     * @throws IllegalArgumentException if the initial capacity is negative
+     *         or the load factor is nonpositive
+     */
+    public WordMap(int initialCapacity, float loadFactor) {
+        if (initialCapacity < 0)
+            throw new IllegalArgumentException("Illegal initial capacity: " +
+                    initialCapacity);
+        if (initialCapacity > MAXIMUM_CAPACITY)
+            initialCapacity = MAXIMUM_CAPACITY;
+        if (loadFactor <= 0 || Float.isNaN(loadFactor))
+            throw new IllegalArgumentException("Illegal load factor: " +
+                    loadFactor);
+
+        // Find a power of 2 >= initialCapacity
+        int capacity = 1;
+        while (capacity < initialCapacity)
+            capacity <<= 1;
+
+        this.loadFactor = loadFactor;
+        threshold = (int)(capacity * loadFactor);
         table = new Entry[capacity];
+        init();
     }
 
-
-
-    public int getCapacity() {
-        return capacity;
+    /**
+     * Constructs an empty <tt>WordMap</tt> with the specified initial
+     * capacity and the default load factor (0.75).
+     *
+     * @param  initialCapacity the initial capacity.
+     * @throws IllegalArgumentException if the initial capacity is negative.
+     */
+    public WordMap(int initialCapacity) {
+        this(initialCapacity, DEFAULT_LOAD_FACTOR);
     }
 
-    @Override
+    /**
+     * Constructs an empty <tt>WordMap</tt> with the default initial capacity
+     * (16) and the default load factor (0.75).
+     */
+    public WordMap() {
+        this.loadFactor = DEFAULT_LOAD_FACTOR;
+        threshold = (int)(DEFAULT_INITIAL_CAPACITY * DEFAULT_LOAD_FACTOR);
+        table = new Entry[DEFAULT_INITIAL_CAPACITY];
+        init();
+    }
+
+    /**
+     * Constructs a new <tt>WordMap</tt> with the same mappings as the
+     * specified <tt>Map</tt>.  The <tt>WordMap</tt> is created with
+     * default load factor (0.75) and an initial capacity sufficient to
+     * hold the mappings in the specified <tt>Map</tt>.
+     *
+     * @param   m the map whose mappings are to be placed in this map
+     * @throws  NullPointerException if the specified map is null
+     */
+    public WordMap(Map m) {
+        this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1,
+                DEFAULT_INITIAL_CAPACITY), DEFAULT_LOAD_FACTOR);
+        putAllForCreate(m);
+    }
+
+    // internal utilities
+
+    /**
+     * Initialization hook for subclasses. This method is called
+     * in all constructors and pseudo-constructors (clone, readObject)
+     * after WordMap has been initialized but before any entries have
+     * been inserted.  (In the absence of this method, readObject would
+     * require explicit knowledge of subclasses.)
+     */
+    void init() {
+    }
+
+    /**
+     * Applies a supplemental hash function to a given hashCode, which
+     * defends against poor quality hash functions.  This is critical
+     * because WordMap uses power-of-two length hash tables, that
+     * otherwise encounter collisions for hashCodes that do not differ
+     * in lower bits. Note: Null keys always map to hash 0, thus index 0.
+     */
+    static int hash(int h) {
+        // This function ensures that hashCodes that differ only by
+        // constant multiples at each bit position have a bounded
+        // number of collisions (approximately 8 at default load factor).
+        h ^= (h >>> 20) ^ (h >>> 12);
+        return h ^ (h >>> 7) ^ (h >>> 4);
+    }
+
+    /**
+     * Returns index for hash code h.
+     */
+    static int indexFor(int h, int length) {
+        return h & (length-1);
+    }
+
+    /**
+     * Returns the number of key-value mappings in this map.
+     *
+     * @return the number of key-value mappings in this map
+     */
     public int size() {
         return size;
     }
-    @Override
+
+    /**
+     * Returns <tt>true</tt> if this map contains no key-value mappings.
+     *
+     * @return <tt>true</tt> if this map contains no key-value mappings
+     */
     public boolean isEmpty() {
         return size == 0;
     }
 
-
-    private int find(Object key) {
-        int index =  key.hashCode() % table.length;
-        while(table[index] != null && !key.equals(table[index].key)){
-            index = (index + 1) %  table.length;
+    public Object get(Object key) {
+        if (key == null)
+            return getForNullKey();
+        int hash = hash(key.hashCode());
+        for (Entry<Object,Object> e = table[indexFor(hash, table.length)];
+             e != null;
+             e = e.next) {
+            Object k;
+            if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
+                return e.value;
         }
-        return index;
+        return null;
+    }
 
+    /**
+     * Offloaded version of get() to look up null keys.  Null keys map
+     * to index 0.  This null case is split out into separate methods
+     * for the sake of performance in the two most commonly used
+     * operations (get and put), but incorporated with conditionals in
+     * others.
+     */
+    private Object getForNullKey() {
+        for (Entry<Object,Object> e = table[0]; e != null; e = e.next) {
+            if (e.key == null)
+                return e.value;
+        }
+        return null;
     }
-    @Override
+
+    /**
+     * Returns <tt>true</tt> if this map contains a mapping for the
+     * specified key.
+     *
+     * @param   key   The key whose presence in this map is to be tested
+     * @return <tt>true</tt> if this map contains a mapping for the specified
+     * key.
+     */
     public boolean containsKey(Object key) {
-        int index =  find(key);
-        return table[index] != null;
+        return getEntry(key) != null;
     }
-    @Override
+
+    /**
+     * Returns the entry associated with the specified key in the
+     * WordMap.  Returns null if the WordMap contains no mapping
+     * for the key.
+     */
+    final Entry<Object,Object> getEntry(Object key) {
+        int hash = (key == null) ? 0 : hash(key.hashCode());
+        for (Entry<Object,Object> e = table[indexFor(hash, table.length)];
+             e != null;
+             e = e.next) {
+            Object k;
+            if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k))))
+                return e;
+        }
+        return null;
+    }
+
+
+    /**
+     * Associates the specified value with the specified key in this map.
+     * If the map previously contained a mapping for the key, the old
+     * value is replaced.
+     *
+     * @param key key with which the specified value is to be associated
+     * @param value value to be associated with the specified key
+     * @return the previous value associated with <tt>key</tt>, or
+     *         <tt>null</tt> if there was no mapping for <tt>key</tt>.
+     *         (A <tt>null</tt> return can also indicate that the map
+     *         previously associated <tt>null</tt> with <tt>key</tt>.)
+     */
+    public Object put(Object key, Object value) {
+        if (key == null)
+            return putForNullKey(value);
+        int hash = hash(key.hashCode());
+        int i = indexFor(hash, table.length);
+        for (Entry<Object,Object> e = table[i]; e != null; e = e.next) {
+            Object k;
+            if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
+                Object oldValue = e.value;
+                e.value = value;
+                e.recordAccess(this);
+                return oldValue;
+            }
+        }
+
+        modCount++;
+        addEntry(hash, key, value, i);
+        return null;
+    }
+
+    /**
+     * Offloaded version of put for null keys
+     */
+    private Object putForNullKey(Object value) {
+        for (Entry<Object,Object> e = table[0]; e != null; e = e.next) {
+            if (e.key == null) {
+                Object oldValue = e.value;
+                e.value = value;
+                e.recordAccess(this);
+                return oldValue;
+            }
+        }
+        modCount++;
+        addEntry(0, null, value, 0);
+        return null;
+    }
+
+    /**
+     * This method is used instead of put by constructors and
+     * pseudoconstructors (clone, readObject).  It does not resize the table,
+     * check for comodification, etc.  It calls createEntry rather than
+     * addEntry.
+     */
+    private void putForCreate(Object key, Object value) {
+        int hash = (key == null) ? 0 : hash(key.hashCode());
+        int i = indexFor(hash, table.length);
+
+        /**
+         * Look for preexisting entry for key.  This will never happen for
+         * clone or deserialize.  It will only happen for construction if the
+         * input Map is a sorted map whose ordering is inconsistent w/ equals.
+         */
+        for (Entry<Object,Object> e = table[i]; e != null; e = e.next) {
+            Object k;
+            if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k)))) {
+                e.value = value;
+                return;
+            }
+        }
+
+        createEntry(hash, key, value, i);
+    }
+
+    private void putAllForCreate(Map<? extends Object, ? extends Object> m) {
+        for (Map.Entry<? extends Object, ? extends Object> e : m.entrySet())
+            putForCreate(e.getKey(), e.getValue());
+    }
+
+    /**
+     * Rehashes the contents of this map into a new array with a
+     * larger capacity.  This method is called automatically when the
+     * number of keys in this map reaches its threshold.
+     *
+     * If current capacity is MAXIMUM_CAPACITY, this method does not
+     * resize the map, but sets threshold to Integer.MAX_VALUE.
+     * This has the effect of preventing future calls.
+     *
+     * @param newCapacity the new capacity, MUST be a power of two;
+     *        must be greater than current capacity unless current
+     *        capacity is MAXIMUM_CAPACITY (in which case value
+     *        is irrelevant).
+     */
+    void resize(int newCapacity) {
+        Entry[] oldTable = table;
+        int oldCapacity = oldTable.length;
+        if (oldCapacity == MAXIMUM_CAPACITY) {
+            threshold = Integer.MAX_VALUE;
+            return;
+        }
+
+        Entry[] newTable = new Entry[newCapacity];
+        transfer(newTable);
+        table = newTable;
+        threshold = (int)(newCapacity * loadFactor);
+    }
+
+    /**
+     * Transfers all entries from current table to newTable.
+     */
+    void transfer(Entry[] newTable) {
+        Entry[] src = table;
+        int newCapacity = newTable.length;
+        for (int j = 0; j < src.length; j++) {
+            Entry<Object,Object> e = src[j];
+            if (e != null) {
+                src[j] = null;
+                do {
+                    Entry<Object,Object> next = e.next;
+                    int i = indexFor(e.hash, newCapacity);
+                    e.next = newTable[i];
+                    newTable[i] = e;
+                    e = next;
+                } while (e != null);
+            }
+        }
+    }
+
+    public void putAll(Map m) {
+    }
+
+    /**
+     * Removes the mapping for the specified key from this map if present.
+     *
+     * @param  key key whose mapping is to be removed from the map
+     * @return the previous value associated with <tt>key</tt>, or
+     *         <tt>null</tt> if there was no mapping for <tt>key</tt>.
+     *         (A <tt>null</tt> return can also indicate that the map
+     *         previously associated <tt>null</tt> with <tt>key</tt>.)
+     */
+    public Object remove(Object key) {
+        Entry<Object,Object> e = removeEntryForKey(key);
+        return (e == null ? null : e.value);
+    }
+
+    /**
+     * Removes and returns the entry associated with the specified key
+     * in the WordMap.  Returns null if the WordMap contains no mapping
+     * for this key.
+     */
+    final Entry<Object,Object> removeEntryForKey(Object key) {
+        int hash = (key == null) ? 0 : hash(key.hashCode());
+        int i = indexFor(hash, table.length);
+        Entry<Object,Object> prev = table[i];
+        Entry<Object,Object> e = prev;
+
+        while (e != null) {
+            Entry<Object,Object> next = e.next;
+            Object k;
+            if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k)))) {
+                modCount++;
+                size--;
+                if (prev == e)
+                    table[i] = next;
+                else
+                    prev.next = next;
+                e.recordRemoval(this);
+                return e;
+            }
+            prev = e;
+            e = next;
+        }
+
+        return e;
+    }
+
+    /**
+     * Special version of remove for EntrySet.
+     */
+    final Entry<Object,Object> removeMapping(Object o) {
+        if (!(o instanceof Map.Entry))
+            return null;
+
+        Map.Entry<Object,Object> entry = (Map.Entry<Object,Object>) o;
+        Object key = entry.getKey();
+        int hash = (key == null) ? 0 : hash(key.hashCode());
+        int i = indexFor(hash, table.length);
+        Entry<Object,Object> prev = table[i];
+        Entry<Object,Object> e = prev;
+
+        while (e != null) {
+            Entry<Object,Object> next = e.next;
+            if (e.hash == hash && e.equals(entry)) {
+                modCount++;
+                size--;
+                if (prev == e)
+                    table[i] = next;
+                else
+                    prev.next = next;
+                e.recordRemoval(this);
+                return e;
+            }
+            prev = e;
+            e = next;
+        }
+
+        return e;
+    }
+
+    /**
+     * Removes all of the mappings from this map.
+     * The map will be empty after this call returns.
+     */
+    public void clear() {
+        modCount++;
+        Entry[] tab = table;
+        for (int i = 0; i < tab.length; i++)
+            tab[i] = null;
+        size = 0;
+    }
+
     /**
      * Returns <tt>true</tt> if this map maps one or more keys to the
      * specified value.
@@ -111,39 +479,6 @@ public class WordMap implements Map {
     }
 
     /**
-     * Returns index for hash code h.
-     */
-    static int indexFor(int h, int length) {
-        return h & (length-1);
-    }
-
-    static int hash(int h) {
-        // This function ensures that hashCodes that differ only by
-        // constant multiples at each bit position have a bounded
-        // number of collisions (approximately 8 at default load factor).
-        h ^= (h >>> 20) ^ (h >>> 12);
-        return h ^ (h >>> 7) ^ (h >>> 4);
-    }
-
-    /**
-     * Returns the entry associated with the specified key in the
-     * HashMap.  Returns null if the HashMap contains no mapping
-     * for the key.
-     */
-    final Entry<Object,Object> getEntry(Object key) {
-        int hash = (key == null) ? 0 : hash(key.hashCode());
-        for (Entry<Object,Object> e = table[indexFor(hash, table.length)];
-             e != null;
-             e = (Entry<Object, Object>) e.next) {
-            Object k;
-            if (e.hash == hash &&
-                    ((k = e.key) == key || (key != null && key.equals(k))))
-                return e;
-        }
-        return null;
-    }
-
-    /**
      * Special-case code for containsValue with null argument
      */
     private boolean containsNullValue() {
@@ -154,139 +489,126 @@ public class WordMap implements Map {
                     return true;
         return false;
     }
-    @Override
-    public Object get(Object key) {
-        int index = key.hashCode() % capacity;
-        while (true){
-            if(table[index] == null){
-                return null;
-            }else if (key.equals(table[index].key)){
-                return table[index].value;
-            }else {
-                index = (index + 1) % capacity;
-            }
-        }
-    }
 
-    @Override
-    public Object put(Object key, Object value) {
-        if (key == null){
-            return null;
-        }
-        int index = key.hashCode() % capacity;
-        while(true) {
-            if (table [index] == null) {
-                if(1.0*size/capacity >= Max_LOAD ){
-                    rehash();
-                }
-                table[index] = (Entry<Object, Object>) new Entry<Object, Object>(key, value);
-                size++;
-                return null;
-            }else if (key.equals(table[index].key)){
-                Object old = table[index].value;
-                table[index].value = value;
-                return old;
-            } else {
-                index = (index + 1) % capacity;
-
-            }
-            modCount++;
-        }
-    }
-
-    private void rehash(){
-        size = 0;
-        capacity = 2 * capacity + 1;
-        Entry[] oldTable = table;
-        table = new Entry[capacity];
-        for (int i = 0; i < oldTable.length; i++){
-            if(oldTable[i] == null){
-                continue;
-            }
-            Object key =  oldTable[i].key;
-            Object value = oldTable[i].value;
-            this.put(key,value);
-
-        }
-
-    }
-
-
-    @Override
-    public Object remove(Object key) {
-        int index = key.hashCode() % capacity;
-        while (true){
-            if(table[index] == null ){
-                return null;
-            }else if (key.equals(table[index].key)){
-                Object old = table[index].value;
-                table[index] = DELETED;
-                size--;
-                numDeleted++;
-                return old;
-            }else {
-                index = (index + 1) % capacity;
-            }
-        }
-    }
-    @Override
     /**
-     * Copies all of the mappings from the specified map to this map.
-     * These mappings will replace any mappings that this map had for
-     * any of the keys currently in the specified map.
+     * Returns a shallow copy of this <tt>WordMap</tt> instance: the keys and
+     * values themselves are not cloned.
      *
-     * @param m mappings to be stored in this map
-     * @throws NullPointerException if the specified map is null
+     * @return a shallow copy of this map
      */
-    public void putAll(Map m) {
-        int numKeysToBeAdded = m.size();
-        if (numKeysToBeAdded == 0)
-            return;
-        if (numKeysToBeAdded > threshold) {
-            int targetCapacity = (int)(numKeysToBeAdded / Max_LOAD + 1);
-            if (targetCapacity > capacity)
-                targetCapacity = capacity;
-            int newCapacity = table.length;
-            while (newCapacity < targetCapacity)
-                newCapacity <<= 1;
-            if (newCapacity > table.length)
-                rehash();
+    public Object clone() {
+        WordMap result = null;
+        try {
+            result = (WordMap)super.clone();
+        } catch (CloneNotSupportedException e) {
+            // assert false;
         }
+        result.table = new Entry[table.length];
+        result.entrySet = null;
+        result.modCount = 0;
+        result.size = 0;
+        result.init();
+        result.putAllForCreate(this);
 
+        return result;
     }
 
-    public String toString(){
-        StringBuilder out = new StringBuilder();
-        for(Entry entry : table){
-            if(entry== null  || entry == DELETED){
-                continue;
+    static class Entry<k,v> implements Map.Entry<Object,Object> {
+        final java.lang.Object key;
+        java.lang.Object value;
+        Entry<Object,Object> next;
+        final int hash;
+
+        /**
+         * Creates new entry.
+         */
+        Entry(int h, Object k, Object v, Entry<Object,Object> n) {
+            value = v;
+            next = n;
+            key = k;
+            hash = h;
+        }
+
+        public final Object getKey() {
+            return key;
+        }
+
+        public final Object getValue() {
+            return value;
+        }
+
+        public final Object setValue(Object newValue) {
+            Object oldValue = value;
+            value = newValue;
+            return oldValue;
+        }
+
+        public final boolean equals(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry e = (Map.Entry)o;
+            Object k1 = getKey();
+            Object k2 = e.getKey();
+            if (k1 == k2 || (k1 != null && k1.equals(k2))) {
+                Object v1 = getValue();
+                Object v2 = e.getValue();
+                if (v1 == v2 || (v1 != null && v1.equals(v2)))
+                    return true;
             }
-            out.append(entry + " ");
+            return false;
         }
 
-        return out.toString();
+        public final int hashCode() {
+            return (key==null   ? 0 : key.hashCode()) ^
+                    (value==null ? 0 : value.hashCode());
+        }
+
+        public final String toString() {
+            return getKey() + "=" + getValue();
+        }
+
+        /**
+         * This method is invoked whenever the value in an entry is
+         * overwritten by an invocation of put(k,v) for a key k that's already
+         * in the WordMap.
+         */
+        void recordAccess(WordMap m) {
+        }
+
+        /**
+         * This method is invoked whenever the entry is
+         * removed from the table.
+         */
+        void recordRemoval(WordMap m) {
+        }
     }
-    @Override
+
     /**
-     * Removes all of the mappings from this map.
-     * The map will be empty after this call returns.
+     * Adds a new entry with the specified key, value and hash code to
+     * the specified bucket.  It is the responsibility of this
+     * method to resize the table if appropriate.
+     *
+     * Subclass overrides this to alter the behavior of put method.
      */
-    public void clear() {
-        modCount++;
-        Entry[] tab = table;
-        for (int i = 0; i < tab.length; i++)
-            tab[i] = null;
-        size = 0;
+    void addEntry(int hash, Object key, Object value, int bucketIndex) {
+        Entry<Object,Object> e = table[bucketIndex];
+        table[bucketIndex] = new Entry<>(hash, key, value, e);
+        if (size++ >= threshold)
+            resize(2 * table.length);
     }
 
-    public int count(){
-        int count = 0;
-        for (Entry e: table){
-            if (e != null){
-                count++;
-            }
-    }
-        return count;
+    /**
+     * Like addEntry except that this version is used when creating entries
+     * as part of Map construction or "pseudo-construction" (cloning,
+     * deserialization).  This version needn't worry about resizing the table.
+     *
+     * Subclass overrides this to alter the behavior of WordMap(Map),
+     * clone, and readObject.
+     */
+    void createEntry(int hash, Object key, Object value, int bucketIndex) {
+        Entry<Object,Object> e = table[bucketIndex];
+        table[bucketIndex] = new Entry<>(hash, key, value, e);
+        size++;
     }
 
     private abstract class HashIterator<E> implements Iterator<E> {
@@ -303,16 +625,93 @@ public class WordMap implements Map {
                     ;
             }
         }
+
+        public final boolean hasNext() {
+            return next != null;
+        }
+
+        final Entry<Object,Object> nextEntry() {
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+            Entry<Object,Object> e = next;
+            if (e == null)
+                throw new NoSuchElementException();
+
+            if ((next = e.next) == null) {
+                Entry[] t = table;
+                while (index < t.length && (next = t[index++]) == null)
+                    ;
+            }
+            current = e;
+            return e;
+        }
+
+        public void remove() {
+            if (current == null)
+                throw new IllegalStateException();
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+            Object k = current.key;
+            current = null;
+            WordMap.this.removeEntryForKey(k);
+            expectedModCount = modCount;
+        }
+
+    }
+
+    private final class ValueIterator extends HashIterator<Object> {
+        public Object next() {
+            return nextEntry().value;
+        }
+    }
+
+    private final class KeyIterator extends HashIterator<Object> {
+        public Object next() {
+            return nextEntry().getKey();
+        }
+    }
+
+    private final class EntryIterator extends HashIterator<Map.Entry<Object,Object>> {
+        public Map.Entry<Object,Object> next() {
+            return nextEntry();
+        }
+    }
+
+    // Subclass overrides these to alter behavior of views' iterator() method
+    Iterator<Object> newKeyIterator()   {
+        return new KeyIterator();
+    }
+    Iterator<Object> newValueIterator()   {
+        return new ValueIterator();
+    }
+    Iterator<Map.Entry<Object,Object>> newEntryIterator()   {
+        return new EntryIterator();
     }
 
 
-    @Override
+    // Views
+
+    private transient Set<Map.Entry<Object,Object>> entrySet = null;
+
+    /**
+     * Returns a {@link Set} view of the keys contained in this map.
+     * The set is backed by the map, so changes to the map are
+     * reflected in the set, and vice-versa.  If the map is modified
+     * while an iteration over the set is in progress (except through
+     * the iterator's own <tt>remove</tt> operation), the results of
+     * the iteration are undefined.  The set supports element removal,
+     * which removes the corresponding mapping from the map, via the
+     * <tt>Iterator.remove</tt>, <tt>Set.remove</tt>,
+     * <tt>removeAll</tt>, <tt>retainAll</tt>, and <tt>clear</tt>
+     * operations.  It does not support the <tt>add</tt> or <tt>addAll</tt>
+     * operations.
+     */
     public Set<Object> keySet() {
         if (keySet == null) {
             keySet = new AbstractSet<Object>() {
                 public Iterator<Object> iterator() {
                     return new Iterator<Object>() {
-                        private Iterator<Entry> i = entrySet().iterator();
+                        private Iterator<Map.Entry> i = entrySet().iterator();
 
                         public boolean hasNext() {
                             return i.hasNext();
@@ -345,88 +744,90 @@ public class WordMap implements Map {
                 }
             };
         }
-        return (Set<Object>) keySet;
+        return keySet;
     }
 
 
-    @Override
+    private final class KeySet extends AbstractSet<Object> {
+        public Iterator<Object> iterator() {
+            return newKeyIterator();
+        }
+        public int size() {
+            return size;
+        }
+        public boolean contains(Object o) {
+            return containsKey(o);
+        }
+        public boolean remove(Object o) {
+            return WordMap.this.removeEntryForKey(o) != null;
+        }
+        public void clear() {
+            WordMap.this.clear();
+        }
+    }
+
+    /**
+     * Returns a {@link Collection} view of the values contained in this map.
+     * The collection is backed by the map, so changes to the map are
+     * reflected in the collection, and vice-versa.  If the map is
+     * modified while an iteration over the collection is in progress
+     * (except through the iterator's own <tt>remove</tt> operation),
+     * the results of the iteration are undefined.  The collection
+     * supports element removal, which removes the corresponding
+     * mapping from the map, via the <tt>Iterator.remove</tt>,
+     * <tt>Collection.remove</tt>, <tt>removeAll</tt>,
+     * <tt>retainAll</tt> and <tt>clear</tt> operations.  It does not
+     * support the <tt>add</tt> or <tt>addAll</tt> operations.
+     */
     public Collection values() {
-        if (values == null) {
-            values = new AbstractCollection<Object>() {
-                public Iterator<Object> iterator() {
-                    return new Iterator<Object>() {
-                        private Iterator<Entry> i = entrySet().iterator();
+        Collection<Object> vs = values;
+        return (vs != null ? vs : (values = new Values()));
+    }
 
-                        public boolean hasNext() {
-                            return i.hasNext();
-                        }
-
-                        public Object next() {
-                            return i.next().getValue();
-                        }
-
-                        public void remove() {
-                            i.remove();
-                        }
-                    };
-                }
-
-                public int size() {
-                    return WordMap.this.size();
-                }
-
-                public boolean isEmpty() {
-                    return WordMap.this.isEmpty();
-                }
-
-                public void clear() {
-                    WordMap.this.clear();
-                }
-
-                public boolean contains(Object v) {
-                    return WordMap.this.containsValue(v);
-                }
-            };
+    private final class Values extends AbstractCollection<Object> {
+        public Iterator<Object> iterator() {
+            return newValueIterator();
         }
-        return values;
-    }
-
-    public Set<Entry> entrySet() {
-        Set<Entry> es = entrySet;
-        return es != null ? es : (entrySet);
-    }
-    
-    final Entry<Object,Object> removeMapping(Object o) {
-        if (!(o instanceof Map.Entry))
-            return null;
-
-        Map.Entry<Object,Object> entry = (Map.Entry<Object,Object>) o;
-        Object key = entry.getKey();
-        int hash = (key == null) ? 0 : hash(key.hashCode());
-        int i = indexFor(hash, table.length);
-        Entry<Object,Object> prev = table[i];
-        Entry<Object,Object> e = prev;
-
-        while (e != null) {
-            Entry<Object,Object> next = e.next;
-            if (e.hash == hash && e.equals(entry)) {
-                modCount++;
-                size--;
-                if (prev == e)
-                    table[i] = next;
-                else
-                    prev.next = next;
-                e.recordRemoval((WordMap) this);
-                return e;
-            }
-            prev = e;
-            e = next;
+        public int size() {
+            return size;
         }
-
-        return e;
+        public boolean contains(Object o) {
+            return containsValue(o);
+        }
+        public void clear() {
+            WordMap.this.clear();
+        }
     }
 
-    private final class EntrySet  {
+    /**
+     * Returns a {@link Set} view of the mappings contained in this map.
+     * The set is backed by the map, so changes to the map are
+     * reflected in the set, and vice-versa.  If the map is modified
+     * while an iteration over the set is in progress (except through
+     * the iterator's own <tt>remove</tt> operation, or through the
+     * <tt>setValue</tt> operation on a map entry returned by the
+     * iterator) the results of the iteration are undefined.  The set
+     * supports element removal, which removes the corresponding
+     * mapping from the map, via the <tt>Iterator.remove</tt>,
+     * <tt>Set.remove</tt>, <tt>removeAll</tt>, <tt>retainAll</tt> and
+     * <tt>clear</tt> operations.  It does not support the
+     * <tt>add</tt> or <tt>addAll</tt> operations.
+     *
+     * @return a set view of the mappings contained in this map
+     */
+    public Set<Map.Entry> entrySet() {
+        return entrySet0();
+    }
+
+    private Set<Map.Entry<Object, Object>> entrySet0() {
+        Set<Map.Entry<Object,Object>> es = entrySet;
+        return es != null ? es : (entrySet = new EntrySet());
+    }
+
+    private final class EntrySet extends AbstractSet<Map.Entry<Object,Object>> {
+        public Iterator<Map.Entry<Object,Object>> iterator() {
+            return newEntryIterator();
+        }
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -445,16 +846,72 @@ public class WordMap implements Map {
         }
     }
 
-    public static void main(String[] args){
-        WordMap map = new WordMap();
+    /**
+     * Save the state of the <tt>WordMap</tt> instance to a stream (i.e.,
+     * serialize it).
+     *
+     * @serialData The <i>capacity</i> of the WordMap (the length of the
+     *             bucket array) is emitted (int), followed by the
+     *             <i>size</i> (an int, the number of key-value
+     *             mappings), followed by the key (Object) and value (Object)
+     *             for each key-value mapping.  The key-value mappings are
+     *             emitted in no particular order.
+     */
+    private void writeObject(java.io.ObjectOutputStream s)
+            throws IOException
+    {
+        Iterator<Map.Entry<Object,Object>> i =
+                (size > 0) ? entrySet0().iterator() : null;
 
-        for(int i = 0; i < 5; i++){
-            map.put((char)('a')+"ello", i);
-            System.out.println(map.size+""+map.count());
+        // Write out the threshold, loadfactor, and any hidden stuff
+        s.defaultWriteObject();
+
+        // Write out number of buckets
+        s.writeInt(table.length);
+
+        // Write out size (number of Mappings)
+        s.writeInt(size);
+
+        // Write out keys and values (alternating)
+        if (i != null) {
+            while (i.hasNext()) {
+                Map.Entry<Object,Object> e = i.next();
+                s.writeObject(e.getKey());
+                s.writeObject(e.getValue());
+            }
         }
-        map.remove("aello");
-        System.out.println(map);
-
     }
 
+    private static final long serialVersionUID = 362498820763181265L;
+
+    /**
+     * Reconstitute the <tt>WordMap</tt> instance from a stream (i.e.,
+     * deserialize it).
+     */
+    private void readObject(java.io.ObjectInputStream s)
+            throws IOException, ClassNotFoundException
+    {
+        // Read in the threshold, loadfactor, and any hidden stuff
+        s.defaultReadObject();
+
+        // Read in number of buckets and allocate the bucket array;
+        int numBuckets = s.readInt();
+        table = new Entry[numBuckets];
+
+        init();  // Give subclass a chance to do its thing.
+
+        // Read in size (number of Mappings)
+        int size = s.readInt();
+
+        // Read the keys and values, and put the mappings in the WordMap
+        for (int i=0; i<size; i++) {
+            Object key = (Object) s.readObject();
+            Object value = (Object) s.readObject();
+            putForCreate(key, value);
+        }
+    }
+
+    // These methods are used when serializing HashSets
+    int   capacity()     { return table.length; }
+    float loadFactor()   { return loadFactor;   }
 }
