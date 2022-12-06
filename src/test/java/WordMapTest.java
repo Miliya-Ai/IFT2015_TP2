@@ -1,19 +1,16 @@
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class WordMapTest {
-    static WordMap map;
+    WordMap map;
 
-    @BeforeAll
+    @BeforeEach
     @DisplayName("Instanciation")
-    static void instanciate(){
+    void instanciate(){
         map = new WordMap();
-        assertEquals(10, map.size(), "A l'instanciation, size != 10 ");
-        assertEquals(1000, map.getCapacity(), "A l'instanciation, capacity != 1000");
+        assertEquals(0, map.size(), "A l'instanciation, size != 0 ");
+        assertEquals(11, map.getCapacity(), "A l'instanciation, capacity != 11");
 
     }
 
@@ -32,7 +29,7 @@ class WordMapTest {
     void isEmpty() {
         initializeElem();
         assertFalse(map.isEmpty(), "Map contient des elements, mais empty = true");
-        clear();
+        map.clear();
         assertTrue(map.isEmpty(), "Map contient pas des elements, mais empty = false");
     }
 
@@ -48,8 +45,8 @@ class WordMapTest {
         FileMap fileMap2 = new FileMap();
         FileMap fileMap3 = new FileMap();
 
-        //map.put("hi", fileMap);
-        //map.put("hi", fileMap2);
+        map.put("hi", fileMap);
+        map.put("hi", fileMap2);
 
         assertTrue(map.containsValue(fileMap2));
         assertFalse(map.containsValue(fileMap3));
@@ -96,8 +93,9 @@ class WordMapTest {
     }
 
     public void initializeElem(){
+        FileMap fileMap = new FileMap();
         for (int i=0; i<20; i++){
-           // map.put("hi" + i,  fileMap); //WorldMap doit accepter un FileMap comme valeur
+           map.put("hi" + i,  fileMap); //WorldMap doit accepter un FileMap comme valeur
         }
 
     }

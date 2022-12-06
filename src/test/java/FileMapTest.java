@@ -35,7 +35,8 @@ class FileMapTest {
 
     @Test
     void isEmpty() {
-        //
+        initializeElem();
+        assertFalse(fileMap.isEmpty());
         fileMap.clear();
         assertEquals(0, fileMap.size());
 

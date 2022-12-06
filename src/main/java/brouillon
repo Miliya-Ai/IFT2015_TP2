@@ -1,14 +1,9 @@
 import java.util.*;
 
-/**
- * FileMap utilise une structure de données ChainHashMap.
- *
- * Code inspire du prof, https://www.algolist.net/Data_structures/Hash_table/Chaining et du hashMap de java
- *  cle : noms des fichiers
- *  valeur : positions du mot dans le fichier correspondant storer dans un arrayList
- */
-public class FileMap implements Map{
-    private Entry[] table;
+//TODO: WorldMap doit seulement accepter un FileMap comme valeur , pas un integer
+
+public class WordMap implements Map {
+    private WordMap.Entry[] table;
     private int buckets = 0; // le nombre de buckets
     protected int capacity; // size of the table
     private int prime; // prime factor
@@ -18,7 +13,7 @@ public class FileMap implements Map{
     final int originalCapacity = 11;
 
     // TODO: verifier les cas exceptionnels propres a fileMap
-    public FileMap(int capacity, int prime) {
+    public WordMap(int capacity, int prime) {
         this.prime = prime;
         this.capacity = capacity;
         Random rand = new Random();
@@ -26,10 +21,10 @@ public class FileMap implements Map{
         this.shift = rand.nextInt(prime);
         this.createTable();
     }
-    public FileMap( int cap ) { this( cap, 109345121 ); } //appel le premier constructeur
-    public FileMap() { this( 11 ); } //appel le deuxieme constructeur
+    public WordMap( int cap ) { this( cap, 109345121 ); } //appel le premier constructeur
+    public WordMap() { this( 11 ); } //appel le deuxieme constructeur
 
-    public Entry[] getTable() {
+    public WordMap.Entry[] getTable() {
         return table;
     }
 
@@ -49,7 +44,7 @@ public class FileMap implements Map{
      * Des le depart, la table a toutes des entry qui sont null
      */
     protected void createTable() {
-        table = new Entry[this.capacity];
+        table = new WordMap.Entry[this.capacity];
         for (int i = 0; i < capacity; i++)
             table[i] = null;
     }
@@ -95,10 +90,10 @@ public class FileMap implements Map{
 
 
     }
-    final FileMap.Entry getEntry(Object key) {
+    final WordMap.Entry getEntry(Object key) {
         int hash = (key == null) ? 0 : hash(key.hashCode());
 
-        for (FileMap.Entry e = table[indexFor(hash, table.length)];
+        for (WordMap.Entry e = table[indexFor(hash, table.length)];
              e != null;
              e = e.next) {
             Object k;
@@ -117,7 +112,7 @@ public class FileMap implements Map{
      */
     @Override
     public boolean containsValue(Object value) throws ClassCastException {
-        if (!(value instanceof Integer)){
+        if (!(value instanceof FileMap)){
             throw new ClassCastException("La valeur doit etre un Int, la position du mot dans le fichier.");
         }
 
@@ -125,9 +120,9 @@ public class FileMap implements Map{
             return false;
         }
 
-        FileMap.Entry[] tab = table;
+        WordMap.Entry[] tab = table;
         for (int i = 0; i < tab.length ; i++)
-            for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
+            for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
                 if (e.containSpecificValue(value))
                     return true;
         return false;
@@ -139,9 +134,9 @@ public class FileMap implements Map{
             throw new ClassCastException("La cle doit etre un String, le nom du fichier");
         }
         int hash = hash(key.hashCode());
-        for (Entry e = table[indexFor(hash, table.length)];
-            e != null;
-            e = e.next) {
+        for (WordMap.Entry e = table[indexFor(hash, table.length)];
+             e != null;
+             e = e.next) {
             Object k;
             if ( e.hash == hash && ((k = e.key) == key ||key.equals(k)))
                 return e.value;
@@ -150,8 +145,8 @@ public class FileMap implements Map{
     }
 
     void addEntry(int hash, Object key, Object value, int bucketIndex) {
-        FileMap.Entry e = table[bucketIndex];
-        table[bucketIndex] = new FileMap.Entry(hash, key, value, e);
+        WordMap.Entry e = table[bucketIndex];
+        table[bucketIndex] = new WordMap.Entry(hash, key, value, e);
         buckets++;
         if (isAboveLoadFactor()){
             resize();
@@ -159,14 +154,14 @@ public class FileMap implements Map{
     }
     @Override
     public Object put(Object key, Object value) throws ClassCastException {
-        if (!((key instanceof String) && (value instanceof Integer))){
+        if (!((key instanceof String) && (value instanceof FileMap))){
             throw new ClassCastException("La cle doit etre un string, le nom d'un fichier. " +
-                                        "La valeur doit etre un int, la position du mot dans ce fichier.");
+                    "La valeur doit etre un int, la position du mot dans ce fichier.");
         }
 
         int hash = hash(key.hashCode());
         int i = indexFor(hash, table.length);
-        for (FileMap.Entry e = table[i]; e != null; e = e.next) {
+        for (WordMap.Entry e = table[i]; e != null; e = e.next) {
             Object k;
             if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
                 return e.setValue(value);
@@ -177,14 +172,14 @@ public class FileMap implements Map{
         return null;
 
     }
-    final FileMap.Entry removeEntryForKey(Object key) {
+    final WordMap.Entry removeEntryForKey(Object key) {
         int hash = (key == null) ? 0 : hash(key.hashCode());
         int i = indexFor(hash, table.length);
-        FileMap.Entry prev = table[i];
-        FileMap.Entry e = prev;
+        WordMap.Entry prev = table[i];
+        WordMap.Entry e = prev;
 
         while (e != null) {
-            FileMap.Entry next = e.next;
+            WordMap.Entry next = e.next;
             Object k;
             if (e.hash == hash &&
                     ((k = e.key) == key || (key != null && key.equals(k)))) {
@@ -207,7 +202,7 @@ public class FileMap implements Map{
         if (!(key instanceof String)){
             throw new ClassCastException("La cle doit etre un String, le nom du fichier.");
         }
-        FileMap.Entry e = removeEntryForKey(key);
+        WordMap.Entry e = removeEntryForKey(key);
         return (e == null ? null : e.value);
 
     }
@@ -231,9 +226,9 @@ public class FileMap implements Map{
         Set<Object> keySet = new HashSet<>();
 
         if (buckets != 0) {
-            FileMap.Entry[] tab = table;
+            WordMap.Entry[] tab = table;
             for (int i = 0; i < tab.length ; i++)
-                for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
+                for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
                     keySet.add(e.getKey());
 
         }
@@ -248,9 +243,9 @@ public class FileMap implements Map{
         Collection values = new ArrayList<>();
 
         if (buckets != 0){
-            FileMap.Entry[] tab = table;
+            WordMap.Entry[] tab = table;
             for (int i = 0; i < tab.length ; i++)
-                for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
+                for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
                     values.add(e.getValue());
             /*
             for (int i = 0; i < capacity; i++){
@@ -273,14 +268,14 @@ public class FileMap implements Map{
         return values;
     }
     @Override
-    public Set<FileMap.Entry> entrySet() {
-        Set<FileMap.Entry> entrySet = new HashSet<>();
+    public Set<WordMap.Entry> entrySet() {
+        Set<WordMap.Entry> entrySet = new HashSet<>();
 
 
         if (buckets != 0) {
-            FileMap.Entry[] tab = table;
+            WordMap.Entry[] tab = table;
             for (int i = 0; i < tab.length ; i++)
-                for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
+                for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
                     entrySet.add((e));
             /*
             for (int i = 0; i < capacity; i++) {
@@ -296,15 +291,15 @@ public class FileMap implements Map{
     }
 
 
-    void transfer(FileMap.Entry[] newTable) {
-        FileMap.Entry[] src = table;
+    void transfer(WordMap.Entry[] newTable) {
+        WordMap.Entry[] src = table;
         int newCapacity = newTable.length;
         for (int j = 0; j < src.length; j++) {
-            FileMap.Entry e = src[j];
+            WordMap.Entry e = src[j];
             if (e != null) {
                 src[j] = null;
                 do {
-                    FileMap.Entry next = e.next;
+                    WordMap.Entry next = e.next;
                     int i = indexFor(e.hash, newCapacity);
                     e.next = newTable[i];
                     newTable[i] = e;
@@ -315,9 +310,9 @@ public class FileMap implements Map{
     }
 
     public void resize(){
-        FileMap.Entry[] oldTable = table;
+        WordMap.Entry[] oldTable = table;
         int newCapacity = (2* this.capacity) + 1;
-        FileMap.Entry[] newTable = new Entry[newCapacity];
+        WordMap.Entry[] newTable = new WordMap.Entry[newCapacity];
         transfer(newTable);
 
         this.capacity = newCapacity;
@@ -352,11 +347,11 @@ public class FileMap implements Map{
     protected static class Entry<K, V>  implements Map.Entry<K, V>{
         private K key; // for the key
         private ArrayList value = new ArrayList(); // for the value
-        private Entry next;
+        private WordMap.Entry next;
         final int hash;
 
 
-        public Entry(int h, K key, V value, Entry n ) {
+        public Entry(int h, K key, V value, WordMap.Entry n ) {
             this.key = key;
             this.value.add(value);
             this.next = n;
@@ -366,7 +361,7 @@ public class FileMap implements Map{
         // getters
         public K getKey() { return this.key; }
         public V getValue() { return (V) this.value; }
-        public Entry getNext(){return this.next;}
+        public WordMap.Entry getNext(){return this.next;}
         public boolean containSpecificValue(V value) {
             return this.value.contains(value);
         }
@@ -381,7 +376,7 @@ public class FileMap implements Map{
             }
             return (V) old;
         }
-        public void setNext(Entry next){ this.next = next;}
+        public void setNext(WordMap.Entry next){ this.next = next;}
 
 
 
@@ -394,15 +389,15 @@ public class FileMap implements Map{
     }
 
     private abstract class FileMapIterator<E> implements Iterator<E> {
-        FileMap.Entry next;        // next entry to return
+        WordMap.Entry next;        // next entry to return
         int expectedModCount;   // For fast-fail
         int index;              // current slot
-        FileMap.Entry current;     // current entry
+        WordMap.Entry current;     // current entry
 
         void HashIterator() {
             expectedModCount = modCount;
             if (buckets > 0) { // advance to first entry
-                FileMap.Entry[] t = table;
+                WordMap.Entry[] t = table;
                 while (index < t.length && (next = t[index++]) == null)
                     ;
             }
@@ -412,15 +407,15 @@ public class FileMap implements Map{
             return next != null;
         }
 
-        final FileMap.Entry nextEntry() {
+        final WordMap.Entry nextEntry() {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
-            FileMap.Entry e = next;
+            WordMap.Entry e = next;
             if (e == null)
                 throw new NoSuchElementException();
 
             if ((next = e.next) == null) {
-                FileMap.Entry[] t = table;
+                WordMap.Entry[] t = table;
                 while (index < t.length && (next = t[index++]) == null)
                     ;
             }
@@ -431,36 +426,36 @@ public class FileMap implements Map{
 
     }
 
-    private final class ValueIterator extends FileMapIterator<Object> {
+    private final class ValueIterator extends WordMap.FileMapIterator<Object> {
         public Object next() {
             return nextEntry().value;
         }
     }
 
-    private final class KeyIterator extends FileMapIterator<Object> {
+    private final class KeyIterator extends WordMap.FileMapIterator<Object> {
         public Object next() {
             return nextEntry().getKey();
         }
     }
 
-    private final class EntryIterator extends FileMapIterator<Map.Entry> {
-        public FileMap.Entry next() {
+    private final class EntryIterator extends WordMap.FileMapIterator<Map.Entry> {
+        public WordMap.Entry next() {
             return nextEntry();
         }
     }
 
     // Subclass overrides these to alter behavior of views' iterator() method
     Iterator<Object> newKeyIterator()   {
-        return new FileMap.KeyIterator();
+        return new WordMap.KeyIterator();
     }
     Iterator<Object> newValueIterator()   {
-        return new FileMap.ValueIterator();
+        return new WordMap.ValueIterator();
     }
     Iterator<Map.Entry> newEntryIterator()   {
-        return new FileMap.EntryIterator();
+        return new WordMap.EntryIterator();
     }
     public static void main(String[] args) throws Exception {
-        FileMap foo = new FileMap();
+        WordMap foo = new WordMap();
 
         for (int i=0; i<20; i++){
             foo.put("hi" + i,  1);
