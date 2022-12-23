@@ -12,7 +12,7 @@ class PreprocessTest {
 
     }
      */
-
+/*
     @Test
     void init() {
         initiate("dataset/dataset");
@@ -23,4 +23,6 @@ class PreprocessTest {
     void initiate(String pathDataSet){
         preprocess = new Preprocess(pathDataSet);
     }
+
+ */
 }

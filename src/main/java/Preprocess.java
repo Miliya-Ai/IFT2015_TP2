@@ -9,6 +9,71 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+public class Preprocess {
+    private final String pathDataSet;
+    File directoryPath;
+    File filesList[];
+
+    //constructeur
+    public Preprocess(String pathDataSet) {
+        this.pathDataSet = pathDataSet;
+        init();
+    }
+
+    /*---------------------- Code de pretraitement de  Faezeh Pouya Mehr ------------------------------------------------
+      -------------------- https://studium.umontreal.ca/mod/forum/discuss.php?d=1241377 ------------------------------------*/
+    public void init() {
+        directoryPath = new File(pathDataSet);
+        filesList = directoryPath.listFiles();
+        for (File file : filesList) {
+            try {
+
+                //Pour mac
+                //FileReader reader = new FileReader(pathDataSet + "/"+file.getName());
+
+                FileReader reader = new FileReader(pathDataSet + "\\" + file.getName());
+                BufferedReader br = new BufferedReader(reader);
+                StringBuffer word = new StringBuffer();
+                String line;
+                while ((line = br.readLine()) != null) {
+
+                    String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
+                    String finalline = newline.replaceAll("\\s+", " ").trim();
+                    // set up pipeline properties
+                    Properties props = new Properties();
+                    // set the list of annotators to run
+                    props.setProperty("annotators", "tokenize,pos,lemma");
+                    // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
+                    props.setProperty("coref.algorithm", "neural");
+                    // build pipeline
+                    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+                    // create a document object
+                    CoreDocument document = new CoreDocument(finalline);
+                    // annnotate the document
+                    pipeline.annotate(document);
+                    System.out.println(document.tokens());
+                    for (CoreLabel tok : document.tokens()) {
+                        String str = String.valueOf(tok.lemma());
+                        if (!(str.contains("'s") || str.contains("’s"))) {
+                            word.append(str).append(" ");
+                        }
+                    }
+                }
+                reader.close();
+
+                String str = String.valueOf(word);
+                str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        }}
+}
+
+
+/*
 // code inspiré de https://www.tutorialspoint.com/how-to-read-data-from-all-files-in-a-directory-using-java
 public class Preprocess {
 
@@ -27,8 +92,22 @@ public class Preprocess {
         filesList = directoryPath.listFiles();
 
         for(File file: filesList){
-            replacePonctuations();
-            nplTextProcession();
+            try {
+                FileReader reader = new FileReader(pathDataSet+"\\"+ file.getName());
+                BufferedReader bufferedReader = new BufferedReader(reader);
+
+
+                System.out.println(file.getName());
+
+
+
+                reader.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+           // replacePonctuations();
+           // nplTextProcession();
         }
 
 
@@ -67,11 +146,11 @@ public class Preprocess {
             //          then space
             //      if (mot w = plusierus spaces)
             //          then 1 space
-            /*
+
             bufferedWriter.write("Hello World");
             bufferedWriter.newLine();
             bufferedWriter.write("See You Again!");
-             */
+
 
             bufferedWriter.close();
         } catch (IOException e) {
@@ -79,8 +158,8 @@ public class Preprocess {
         }
     }
 
-/* ---------------------- Code de pretraitement de  Faezeh Pouya Mehr ------------------------------------------------
--------------------- https://studium.umontreal.ca/mod/forum/discuss.php?d=1241377 ------------------------------------
+/*---------------------- Code de pretraitement de  Faezeh Pouya Mehr ------------------------------------------------
+  -------------------- https://studium.umontreal.ca/mod/forum/discuss.php?d=1241377 ------------------------------------
 for (File file : listOfFiles){
    BufferedReader br = new BufferedReader(new FileReader(new File(dir+"/"+file.getName())));
      StringBuffer word = new StringBuffer();
@@ -112,7 +191,7 @@ for (File file : listOfFiles){
 String str = String.valueOf(word);
 str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
 }
- */
+
 
 
 
@@ -155,6 +234,6 @@ str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
         }
     }
 
- */
 
 }
+*/
