@@ -15,61 +15,62 @@ public class Preprocess {
     File filesList[];
 
     //constructeur
-    public Preprocess(String pathDataSet) {
+    public Preprocess(String pathDataSet) throws IOException {
         this.pathDataSet = pathDataSet;
         init();
     }
 
     /*---------------------- Code de pretraitement de  Faezeh Pouya Mehr ------------------------------------------------
       -------------------- https://studium.umontreal.ca/mod/forum/discuss.php?d=1241377 ------------------------------------*/
-    public void init() {
+    public void init() throws IOException {
+
         directoryPath = new File(pathDataSet);
         filesList = directoryPath.listFiles();
         for (File file : filesList) {
-            try {
 
-                //Pour mac
-                //FileReader reader = new FileReader(pathDataSet + "/"+file.getName());
+            BufferedReader br = new BufferedReader(new FileReader(new File(pathDataSet + "\\" + file.getName())));
+            //Pour mac
+            //FileReader reader = new FileReader(pathDataSet + "/"+file.getName());
 
-                FileReader reader = new FileReader(pathDataSet + "\\" + file.getName());
-                BufferedReader br = new BufferedReader(reader);
-                StringBuffer word = new StringBuffer();
-                String line;
-                while ((line = br.readLine()) != null) {
+            //FileReader reader = new FileReader(pathDataSet + "\\" + file.getName());
+            //BufferedReader br = new BufferedReader(reader);
+            StringBuffer word = new StringBuffer();
+            String line;
+            while ((line = br.readLine()) != null) {
 
-                    String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
-                    String finalline = newline.replaceAll("\\s+", " ").trim();
-                    // set up pipeline properties
-                    Properties props = new Properties();
-                    // set the list of annotators to run
-                    props.setProperty("annotators", "tokenize,pos,lemma");
-                    // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
-                    props.setProperty("coref.algorithm", "neural");
-                    // build pipeline
-                    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-                    // create a document object
-                    CoreDocument document = new CoreDocument(finalline);
-                    // annnotate the document
-                    pipeline.annotate(document);
-                    System.out.println(document.tokens());
-                    for (CoreLabel tok : document.tokens()) {
-                        String str = String.valueOf(tok.lemma());
-                        if (!(str.contains("'s") || str.contains("’s"))) {
-                            word.append(str).append(" ");
-                        }
+                String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
+                String finalline = newline.replaceAll("\\s+", " ").trim();
+                // set up pipeline properties
+                Properties props = new Properties();
+                // set the list of annotators to run
+                props.setProperty("annotators", "tokenize,pos,lemma");
+                // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
+                props.setProperty("coref.algorithm", "neural");
+                // build pipeline
+                StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+                // create a document object
+                CoreDocument document = new CoreDocument(finalline);
+                // annnotate the document
+                pipeline.annotate(document);
+                System.out.println(document.tokens());
+                for (CoreLabel tok : document.tokens()) {
+                    String str = String.valueOf(tok.lemma());
+                    if (!(str.contains("'s") || str.contains("’s"))) {
+                        word.append(str).append(" ");
                     }
+                    //System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
                 }
-                reader.close();
-
-                String str = String.valueOf(word);
-                str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+            br.close();
+            //reader.close();
 
-
-        }}
+            String str = String.valueOf(word);
+            str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
+            System.out.println(str);
+            PrintWriter pw = new PrintWriter(file.getName());
+            pw.close();
+        }
+    }
 }
 
 
@@ -207,32 +208,8 @@ str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
     public File[] getFilesList() {
         return filesList;
     }
-    /*
-    public static String text = "Joe Smith wasn't born in California. " +
-            "In 2017, he went to his car, sister's car Paris, France in the summer. " +
-            "His flight left at 3:00pm on July 10th, 2017. " +
-            "After eating some escargot for the first time, Joe said, \"That was delicious!\" " +
-            "He sent a postcard to his sister Jane Smith. " +
-            "After hearing about Joe's trip, Jane decided she might go to France one day.";
-    public static void main(String[] args) {
-        // set up pipeline properties
-        Properties props = new Properties();
-        // set the list of annotators to run
-        props.setProperty("annotators", "tokenize,pos,lemma");
-        // set a property for an annotator, in this case the coref annotator is being
-        // set to use the neural algorithm
-        props.setProperty("coref.algorithm", "neural");
-        // build pipeline
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        // create a document object
-        CoreDocument document = new CoreDocument(text);
-        // annnotate the document
-        pipeline.annotate(document);
-        //System.out.println(document.tokens());
-        for (CoreLabel tok : document.tokens()) {
-            System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
-        }
-    }
+
+
 
 
 }
