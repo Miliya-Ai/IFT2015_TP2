@@ -27,59 +27,59 @@ public class Preprocess {
         directoryPath = new File(pathDataSet);
         filesList = directoryPath.listFiles();
         for (File file : filesList) {
-
-            BufferedReader br = new BufferedReader(new FileReader(new File(pathDataSet + "\\" + file.getName())));
-            //Pour mac
-            //FileReader reader = new FileReader(pathDataSet + "/"+file.getName());
-
-            //FileReader reader = new FileReader(pathDataSet + "\\" + file.getName());
-            //BufferedReader br = new BufferedReader(reader);
-            StringBuffer word = new StringBuffer();
-            String line;
-            while ((line = br.readLine()) != null) {
-
-                String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
-                String finalline = newline.replaceAll("\\s+", " ").trim();
-                // set up pipeline properties
-                Properties props = new Properties();
-                // set the list of annotators to run
-                props.setProperty("annotators", "tokenize,pos,lemma");
-                // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
-                props.setProperty("coref.algorithm", "neural");
-                // build pipeline
-                StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-                // create a document object
-                CoreDocument document = new CoreDocument(finalline);
-                // annnotate the document
-                pipeline.annotate(document);
-                System.out.println(document.tokens());
-                for (CoreLabel tok : document.tokens()) {
-                    String str = String.valueOf(tok.lemma());
-                    if (!(str.contains("'s") || str.contains("’s"))) {
-                        word.append(str).append(" ");
-                    }
-                    //System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
-                }
-            }
-            br.close();
-            //reader.close();
-
-            String str = String.valueOf(word);
-            str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
-            System.out.println(str);
-            PrintWriter pw = new PrintWriter(pathDataSet + "\\" + file.getName());
-            pw.close();
-
-            FileWriter writer = new FileWriter(pathDataSet + "\\" + file.getName());
-            BufferedWriter bufferedWriter = new BufferedWriter(writer);
-            bufferedWriter.write(str);
-
-
-            bufferedWriter.close();
+            preprocess(file);
         }
     }
+
+    public void preprocess(File file) throws IOException {
+        //Pour mac
+        //FileReader reader = new FileReader(pathDataSet + "/"+file.getName());
+
+        FileReader reader = new FileReader(pathDataSet + "\\" + file.getName());
+        BufferedReader br = new BufferedReader(reader);
+        StringBuffer word = new StringBuffer();
+        String line;
+        while ((line = br.readLine()) != null) {
+
+            String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
+            String finalline = newline.replaceAll("\\s+", " ").trim();
+            // set up pipeline properties
+            Properties props = new Properties();
+            // set the list of annotators to run
+            props.setProperty("annotators", "tokenize,pos,lemma");
+            // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
+            props.setProperty("coref.algorithm", "neural");
+            // build pipeline
+            StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+            // create a document object
+            CoreDocument document = new CoreDocument(finalline);
+            // annnotate the document
+            pipeline.annotate(document);
+            System.out.println(document.tokens());
+            for (CoreLabel tok : document.tokens()) {
+                String str = String.valueOf(tok.lemma());
+                if (!(str.contains("'s") || str.contains("’s"))) {
+                    word.append(str).append(" ");
+                }
+            }
+        }
+        br.close();
+        reader.close();
+
+        String str = String.valueOf(word);
+        str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
+        System.out.println(str);
+        PrintWriter pw = new PrintWriter(pathDataSet + "\\" + file.getName());
+        pw.close();
+
+        FileWriter writer = new FileWriter(pathDataSet + "\\" + file.getName());
+        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+        bufferedWriter.write(str);
+
+
+        bufferedWriter.close();
+    }
 }
-{"FILE.txt", [[index des mots dans le fichier file], [mot qui revient le plus souvent]]}
 
 /*
 // code inspiré de https://www.tutorialspoint.com/how-to-read-data-from-all-files-in-a-directory-using-java
@@ -165,43 +165,6 @@ public class Preprocess {
             e.printStackTrace();
         }
     }
-
-/*---------------------- Code de pretraitement de  Faezeh Pouya Mehr ------------------------------------------------
-  -------------------- https://studium.umontreal.ca/mod/forum/discuss.php?d=1241377 ------------------------------------
-for (File file : listOfFiles){
-   BufferedReader br = new BufferedReader(new FileReader(new File(dir+"/"+file.getName())));
-     StringBuffer word = new StringBuffer();
-     String line;
-     while((line = br.readLine()) != null){
-           String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
-           String finalline = newline.replaceAll("\\s+", " ").trim();
-           // set up pipeline properties
-           Properties props = new Properties();
-           // set the list of annotators to run
-           props.setProperty("annotators", "tokenize,pos,lemma");
-           // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
-           props.setProperty("coref.algorithm", "neural");
-           // build pipeline
-           StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-           // create a document object
-           CoreDocument document = new CoreDocument(finalline);
-           // annnotate the document
-           pipeline.annotate(document);
-           //System.out.println(document.tokens());
-           for (CoreLabel tok : document.tokens()) {
-                 String str = String.valueOf(tok.lemma());
-                 if (!(str.contains("'s") || str.contains("’s"))) {
-                          word.append(str).append(" ");
-                 }
-           }
-      }
-
-String str = String.valueOf(word);
-str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
-}
-
-
-
 
     //------------------------------------ GETTERS ------------------------------------------------//
     public String getPathDataSet() {
