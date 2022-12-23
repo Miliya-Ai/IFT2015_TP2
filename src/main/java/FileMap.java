@@ -357,7 +357,7 @@ public class FileMap implements Map{
      * @param <K> cle d'une entry
      * @param <V> valeur d'une entry
      */
-    protected static class Entry<K, V>  implements Map.Entry<K, V>{
+    protected static class Entry<K, V>  {
         private K key; // for the key
         private ArrayList value = new ArrayList(); // for the value
         private Entry next;
@@ -373,7 +373,7 @@ public class FileMap implements Map{
         }
         // getters
         public K getKey() { return this.key; }
-        public V getValue() { return (V) this.value; }
+        public ArrayList getValue() { return this.value; }
         public Entry getNext(){return this.next;}
         public boolean containSpecificValue(V value) {
             return this.value.contains(value);
@@ -382,7 +382,7 @@ public class FileMap implements Map{
 
         protected void setKey( K key ) { this.key = key; }
         public V setValue( V value ) {
-            ArrayList old = new ArrayList<>();
+            ArrayList old = new ArrayList<>(); //Array[0] = listPosition, Array[1] = bigram du key
             old.addAll(this.value);
             if (!(containSpecificValue(value))){
                 this.value.add(value);
@@ -451,7 +451,7 @@ public class FileMap implements Map{
         }
     }
 
-    private final class EntryIterator extends FileMapIterator<Map.Entry> {
+    private final class EntryIterator extends FileMapIterator<Object> {
         public FileMap.Entry next() {
             return nextEntry();
         }
@@ -464,23 +464,26 @@ public class FileMap implements Map{
     Iterator<Object> newValueIterator()   {
         return new FileMap.ValueIterator();
     }
-    Iterator<Map.Entry> newEntryIterator()   {
+    Iterator<Object> newEntryIterator()   {
         return new FileMap.EntryIterator();
     }
+
     public static void main(String[] args) throws Exception {
         FileMap foo = new FileMap();
 
-        for (int i=0; i<20; i++){
-            foo.put("hi" + i,  1);
-
-        }
+        System.out.println(foo.put("hi", 4));
 
 
-        System.out.println(foo.containsKey("hi16"));
-
-        System.out.println(foo.size());
-        System.out.println(foo.keySet());
-        System.out.println(foo.values());
         System.out.println(foo.entrySet());
+
+        System.out.println(foo.put("hi", 5));
+        System.out.println(foo.entrySet());
+
+        System.out.println(foo.put("hi", 6));
+        System.out.println(foo.entrySet());
+
+
+
+
     }
 }

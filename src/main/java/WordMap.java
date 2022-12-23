@@ -354,7 +354,7 @@ public class WordMap implements Map {
      * @param <K> cle d'une entry
      * @param <V> valeur d'une entry
      */
-    protected static class Entry<K, V>  implements Map.Entry<K, V>{
+    protected static class Entry<K, V>{
         private K key; // for the key
         private ArrayList value = new ArrayList(); // for the value
         private WordMap.Entry next;
@@ -371,7 +371,7 @@ public class WordMap implements Map {
         }
         // getters
         public K getKey() { return this.key; }
-        public V getValue() { return (V) this.value; }
+        public ArrayList getValue() { return this.value; }
         public WordMap.Entry getNext(){return this.next;}
         public boolean containSpecificValue(V value) {
             return this.value.contains(value);
@@ -449,7 +449,7 @@ public class WordMap implements Map {
         }
     }
 
-    private final class EntryIterator extends WordMap.FileMapIterator<Map.Entry> {
+    private final class EntryIterator extends WordMap.FileMapIterator<Object> {
         public WordMap.Entry next() {
             return nextEntry();
         }
@@ -462,7 +462,7 @@ public class WordMap implements Map {
     Iterator<Object> newValueIterator()   {
         return new WordMap.ValueIterator();
     }
-    Iterator<Map.Entry> newEntryIterator()   {
+    Iterator<Object> newEntryIterator()   {
         return new WordMap.EntryIterator();
     }
     public static void main(String[] args) throws Exception {
