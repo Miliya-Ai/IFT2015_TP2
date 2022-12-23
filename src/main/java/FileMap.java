@@ -213,8 +213,16 @@ public class FileMap implements Map{
     }
 
     @Override
-    public void putAll(Map m) {}
-
+    public void putAll(Map m) {
+        /* for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+            this.put(entry.getKey(), entry.getValue());
+        }*/
+        FileMap.Entry[] tab = table;
+        for (int i = 0; i < tab.length ; i++)
+            for (FileMap.Entry entry = tab[i]; entry != null ; entry = entry.next){
+                this.put(entry.getKey(), entry.getValue());
+            }
+    }
     //TODO: remettre a la capacity initial pour clear?
     @Override
     public void clear() {
