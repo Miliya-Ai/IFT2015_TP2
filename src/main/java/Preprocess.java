@@ -68,7 +68,13 @@ public class Preprocess {
 
         String str = String.valueOf(word);
         str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
-        System.out.println(str);
+
+        writeFile(file, str);
+
+    }
+    //https://stackoverflow.com/questions/6994518/how-to-delete-the-content-of-text-file-without-deleting-itself
+    // code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java
+    public void writeFile(File file, String str) throws IOException {
         PrintWriter pw = new PrintWriter(pathDataSet + "\\" + file.getName());
         pw.close();
 
@@ -76,94 +82,7 @@ public class Preprocess {
         BufferedWriter bufferedWriter = new BufferedWriter(writer);
         bufferedWriter.write(str);
 
-
         bufferedWriter.close();
-    }
-}
-
-/*
-// code inspiré de https://www.tutorialspoint.com/how-to-read-data-from-all-files-in-a-directory-using-java
-public class Preprocess {
-
-    private final String pathDataSet;
-    File directoryPath;
-    File filesList[];
-
-    //constructeur
-    public Preprocess(String pathDataSet){
-        this.pathDataSet = pathDataSet;
-        init();
-    }
-
-    public void init(){
-        directoryPath= new File(pathDataSet);
-        filesList = directoryPath.listFiles();
-
-        for(File file: filesList){
-            try {
-                FileReader reader = new FileReader(pathDataSet+"\\"+ file.getName());
-                BufferedReader bufferedReader = new BufferedReader(reader);
-
-
-                System.out.println(file.getName());
-
-
-
-                reader.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-           // replacePonctuations();
-           // nplTextProcession();
-        }
-
-
-    }
-
-    private void nplTextProcession() {
-        //TODO: use CORENLP pour traiter le texte
-    }
-
-    // code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java
-    private void replacePonctuations() {
-        try {
-            FileReader reader = new FileReader(pathDataSet);
-            BufferedReader bufferedReader = new BufferedReader(reader);
-
-            String line;
-
-            while ((line = bufferedReader.readLine()) != null) {
-                //TODO:
-                replaceBySingleSpace(line);
-            }
-            reader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //TODO: changer l'argument si necessaire
-    private void replaceBySingleSpace(String line) {
-        try {
-            FileWriter writer = new FileWriter("MyFile.txt");
-            BufferedWriter bufferedWriter = new BufferedWriter(writer);
-
-            //TODO: if (mot w = ponctuation)
-            //          then space
-            //      if (mot w = plusierus spaces)
-            //          then 1 space
-
-            bufferedWriter.write("Hello World");
-            bufferedWriter.newLine();
-            bufferedWriter.write("See You Again!");
-
-
-            bufferedWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     //------------------------------------ GETTERS ------------------------------------------------//
@@ -179,8 +98,4 @@ public class Preprocess {
         return filesList;
     }
 
-
-
-
 }
-*/
