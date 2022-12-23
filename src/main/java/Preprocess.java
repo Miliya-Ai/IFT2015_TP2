@@ -67,12 +67,19 @@ public class Preprocess {
             String str = String.valueOf(word);
             str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
             System.out.println(str);
-            PrintWriter pw = new PrintWriter(file.getName());
+            PrintWriter pw = new PrintWriter(pathDataSet + "\\" + file.getName());
             pw.close();
+
+            FileWriter writer = new FileWriter(pathDataSet + "\\" + file.getName());
+            BufferedWriter bufferedWriter = new BufferedWriter(writer);
+            bufferedWriter.write(str);
+
+
+            bufferedWriter.close();
         }
     }
 }
-
+{"FILE.txt", [[index des mots dans le fichier file], [mot qui revient le plus souvent]]}
 
 /*
 // code inspiré de https://www.tutorialspoint.com/how-to-read-data-from-all-files-in-a-directory-using-java
