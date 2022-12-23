@@ -208,8 +208,16 @@ public class WordMap implements Map {
     }
 
     @Override
-    public void putAll(Map m) {}
-
+    public void putAll(Map m) {
+        /* for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+            this.put(entry.getKey(), entry.getValue());
+        }*/
+        WordMap.Entry[] tab = table;
+        for (int i = 0; i < tab.length ; i++)
+            for (WordMap.Entry entry = tab[i]; entry != null ; entry = entry.next){
+            this.put(entry.getKey(), entry.getValue());
+        }
+    }
     //TODO: remettre a la capacity initial pour clear?
     @Override
     public void clear() {
@@ -267,6 +275,8 @@ public class WordMap implements Map {
         }
         return values;
     }
+
+
     @Override
     public Set<WordMap.Entry> entrySet() {
         Set<WordMap.Entry> entrySet = new HashSet<>();
@@ -356,6 +366,7 @@ public class WordMap implements Map {
             this.value.add(value);
             this.next = n;
             this.hash = h;
+
 
         }
         // getters
