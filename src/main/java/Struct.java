@@ -28,12 +28,7 @@ public class Struct {
                 wordMap.getEntry(word).getValue().put(file, position);
                 position ++;
             }
-
-        //TFIDF
-
-        //Bigrams
         
-
     }
 
 

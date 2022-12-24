@@ -27,15 +27,15 @@ public class Bigrams {
     }
 
     public void countWord(){
-        ArrayList<FileMap> test = wordMap.getEntry(word).getValue();
+        //ArrayList<FileMap> test = wordMap.getEntry(word).getValue();
         ArrayList value = null;
         //for tous les fileMap dans le array list, on va chercher le file qui nous interesse
-        for(FileMap fileMap: test){
-            if (fileMap.containsKey("file.txt")){
-                value = (ArrayList) fileMap.get("file.txt");
-            }
-        }
-        countWord = value.size();
+        //for(FileMap fileMap: test){
+        //    if (fileMap.containsKey("file.txt")){
+        //        value = (ArrayList) fileMap.get("file.txt");
+        //    }
+       // }
+        //countWord = value.size();
 
     }
 

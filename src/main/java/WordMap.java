@@ -123,7 +123,7 @@ public class WordMap implements Map {
         WordMap.Entry[] tab = table;
         for (int i = 0; i < tab.length ; i++)
             for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
-                if (e.containSpecificValue(value))
+                if (value.equals(e.value))
                     return true;
         return false;
     }
@@ -373,19 +373,15 @@ public class WordMap implements Map {
         public K getKey() { return this.key; }
         public FileMap getValue() { return this.value; }
         public WordMap.Entry getNext(){return this.next;}
-        public boolean containSpecificValue(V value) {
-            return this.value.contains(value);
-        }
 
 
         protected void setKey( K key ) { this.key = key; }
         public V setValue( V value ) {
-            ArrayList old = new ArrayList<>();
-            old.addAll(this.value);
-            if (!(containSpecificValue(value))){
-                this.value.add(value);
-            }
+            FileMap old = new FileMap();
+            old = this.value;
+            this.value = (FileMap) value;
             return (V) old;
+
         }
         public void setNext(WordMap.Entry next){ this.next = next;}
 

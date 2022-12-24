@@ -29,6 +29,18 @@ public class TFIDF {
         return sBuilder.toString();
     }
 
+    public void calculerTFIDIF( ){
+/*
+        //TFIDF
+        FileMap fileMapTFIDF = new FileMap();
+        int frequenceMot;
+        for (String word: allWords)
+            fileMapTFIDF = wordMap.getEntry(word).getValue();
+        frequenceMot = fileMapTFIDF.getEntry(file).getValue().size();
+
+ */
+    }
+
     /**
      *
      * Fonction: chaîne de texte entrant, fréquence de retour du mot
