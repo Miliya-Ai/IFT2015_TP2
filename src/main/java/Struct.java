@@ -1,20 +1,32 @@
+import edu.stanford.nlp.pipeline.CoreDocument;
+
+import java.io.File;
+import java.util.ArrayList;
+
 public class Struct {
-    WordMap wordMap;
-    int position = 0;
+    WordMap wordMap = new WordMap();
+    String[] allWords = null;
+    FileMap fileMap = new FileMap();
 
-    public Struct(String pathDataset){
-        init();
-    }
 
-    public void init(){
-        //pour chaque file dans dataset
-        addMot();
+    public Struct(){
 
     }
 
-    public void addMot(){
-        //Lire le fichier deja traité
+    public void createWordMap(String str, String file){
+        allWords = str.split(" ");
+        int position = 1;
 
+        for (String word: allWords)
+            if (!(wordMap.containsKey(word))){
+                FileMap fileMap = new FileMap();
+                fileMap.put(word, position);
+                position ++;
+            } else {
+                wordMap.getEntry(word).getValue().put();
+
+
+            }
         /*
         1. pour chaque mot
         if new mot

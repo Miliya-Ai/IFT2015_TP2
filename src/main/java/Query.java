@@ -6,7 +6,7 @@ public class Query {
         init();
     }
     public Query(String pathDataSet){
-        this.struct = new Struct(pathDataSet);
+        this.struct = new Struct();
         this.bigrams = new Bigrams(this.struct);
         init();
     }

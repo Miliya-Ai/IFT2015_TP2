@@ -46,14 +46,18 @@ public class TFIDF {
 
 
     public static void main(String[] args) {
-            String txtString = TFIDF.getTxtString("/Users/miliya.ai/Documents/GitHub/ift2015_TP2/dataset/dataset/903.txt");
-            Map<String, Integer> treeMap = TFIDF.getCounter(txtString);
-            treeMap.forEach((key, value) ->
-                    System.out.println(key + ": " + value));
-
+        //String txtString = TFIDF.getTxtString("/Users/miliya.ai/Documents/GitHub/ift2015_TP2/dataset/dataset/901.txt");
+        String txtString = TFIDF.getTxtString("C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset\\dataset\\903.txt");
+        Map<String, Integer> treeMap = TFIDF.getCounter(txtString);
+        //treeMap.forEach((key, value) -> System.out.println(key + ": " + value));
+        int totalMot = 0;
+        for (String treeKey : treeMap.keySet()) {
+            totalMot += treeMap.get(treeKey);
         }
-}
+        System.out.println(totalMot);
+    }
 
+    }
 
 
 
