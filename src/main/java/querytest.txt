@@ -1,3 +1,8 @@
 // dataset
-//mot   fréquence   TFIDF   bigrams
-Pluto   2/0/0/0
+// 900.txt => 80
+// 901.txt => 47
+// 902.txt => 79
+// 903.txt => 129
+//mot   fréquence   TF                              IDF                 TFIDF           bigrams     search
+Pluto   2/0/0/0     1/40(0)                         ln(4/1)             0.034657359     in          900.txt
+a       4/1/8/3     [1/20]/[1/47]/[8/79]/[1/43]     0                   0               planet      902.txt
