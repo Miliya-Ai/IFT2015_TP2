@@ -29,7 +29,7 @@ public class Struct {
                 wordMap.getEntry(word).getValue().put(file, position);
                 position ++;
             }
-        System.out.println(HashSet.toString(wordMap.entrySet()));
+        System.out.println(wordMap.entrySet().toString());
     }
 
 
