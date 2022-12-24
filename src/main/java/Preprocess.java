@@ -13,6 +13,7 @@ public class Preprocess {
     private final String pathDataSet;
     File directoryPath;
     File filesList[];
+    Struct struct = new Struct();
 
     //constructeur
     public Preprocess(String pathDataSet) throws IOException {
@@ -71,6 +72,7 @@ public class Preprocess {
 
         writeFile(file, str);
 
+        this.struct.createWordMap(str, file.getName());
     }
     //https://stackoverflow.com/questions/6994518/how-to-delete-the-content-of-text-file-without-deleting-itself
     // code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java
@@ -98,4 +100,7 @@ public class Preprocess {
         return filesList;
     }
 
+    public Struct getStruct() {
+        return struct;
+    }
 }

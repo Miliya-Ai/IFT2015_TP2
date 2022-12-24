@@ -356,14 +356,14 @@ public class WordMap implements Map {
      */
     protected static class Entry<K, V>{
         private K key; // for the key
-        private ArrayList value = new ArrayList(); // for the value
+        private FileMap value = new FileMap(); // for the value
         private WordMap.Entry next;
         final int hash;
 
 
         public Entry(int h, K key, V value, WordMap.Entry n ) {
             this.key = key;
-            this.value.add(value);
+            this.value = (FileMap) value;
             this.next = n;
             this.hash = h;
 
@@ -371,7 +371,7 @@ public class WordMap implements Map {
         }
         // getters
         public K getKey() { return this.key; }
-        public ArrayList getValue() { return this.value; }
+        public FileMap getValue() { return this.value; }
         public WordMap.Entry getNext(){return this.next;}
         public boolean containSpecificValue(V value) {
             return this.value.contains(value);

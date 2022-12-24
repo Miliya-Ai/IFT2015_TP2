@@ -159,7 +159,7 @@ public class FileMap implements Map{
     }
     @Override
     public Object put(Object key, Object value) throws ClassCastException {
-        if (!((key instanceof String) && ((value instanceof Integer)|| (value instanceof String)))){
+        if (!((key instanceof String) && ((value instanceof Integer)|| (value instanceof String)|| (value instanceof Double)))){
             throw new ClassCastException("La cle doit etre un string, le nom d'un fichier. " +
                                         "La valeur doit etre un int, la position du mot dans ce fichier.");
         }
@@ -364,16 +364,21 @@ public class FileMap implements Map{
         final int hash;
         private ArrayList<Integer> position = new ArrayList<Integer>();
         private ArrayList<String> bigram = new ArrayList<String>();
+        private ArrayList<Double> TFIDF = new ArrayList<>();
 
         public Entry(int h, K key, V value, Entry n ) {
             this.value.add(position);
             this.value.add(bigram);
+            this.value.add(TFIDF);
             this.key = key;
             if (value instanceof Integer){
                 position.add((Integer) value);
             }
             if (value instanceof String){
                 bigram.add((String) value);
+            }
+            if (value instanceof Double){
+                TFIDF.add((Double) value);
             }
 
             this.next = n;
@@ -390,6 +395,9 @@ public class FileMap implements Map{
             }
             if (value instanceof String){
                 return bigram.contains((String) value);
+            }
+            if (value instanceof Double){
+                return TFIDF.contains((Double) value);
             }
             return this.value.contains(value);
         }
@@ -409,6 +417,14 @@ public class FileMap implements Map{
                     }
                     else{
                         bigram.add((String) value);
+                    }
+                }
+                if (value instanceof Double){
+                    if (TFIDF.size() != 0){
+                        TFIDF.set(0, (Double) value);
+                    }
+                    else{
+                        TFIDF.add((Double) value);
                     }
                 }
             }
@@ -494,25 +510,6 @@ public class FileMap implements Map{
     }
 
     public static void main(String[] args) throws Exception {
-        /*
-        ArrayList test = new ArrayList<>();
-        ArrayList position = new ArrayList<>();
-        ArrayList bigram = new ArrayList<>();
-
-        test.add(position);
-        test.add(bigram);
-
-        position.add(1);
-        bigram.add("hi");
-
-        System.out.println(test.toString());
-        for(Object elem: test)
-            System.out.println(elem.toString());
-
-         */
-
-
-
         FileMap foo = new FileMap();
 
         System.out.println(foo.put("hi", 4));
@@ -528,6 +525,9 @@ public class FileMap implements Map{
 
         System.out.println(foo.put("hi", "89"));
         System.out.println(foo.put("hi", "yp"));
+
+        foo.put("hi", 34.5);
+        foo.put("hi", 84.5);
 
         System.out.println(foo.entrySet());
 
