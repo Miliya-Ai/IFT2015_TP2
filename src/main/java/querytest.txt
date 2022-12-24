@@ -1,0 +1,3 @@
+// dataset
+//mot   fréquence   TFIDF   bigrams
+Pluto   2/0/0/0
