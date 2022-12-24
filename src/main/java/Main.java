@@ -11,6 +11,7 @@ public class Main {
         //System.out.println(roundOff);
         // pour windows "C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset\\dataset"
         new Preprocess("C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset\\dataset");
+        new Preprocess("C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset2\\dataset2");
         //Struct struct = new Struct(path);
         //new Query(struct);
     }

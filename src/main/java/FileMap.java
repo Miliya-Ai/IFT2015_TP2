@@ -359,13 +359,19 @@ public class FileMap implements Map{
      */
     protected static class Entry<K, V>  {
         private K key; // for the key
-        private ArrayList value = new ArrayList(); // for the value
+        private ArrayList value = new ArrayList<>() ; // for the value [ [liste position] [bigram pour le fichier]   ] 2476
         private Entry next;
         final int hash;
-
+        private ArrayList<Integer> position = new ArrayList<Integer>();
+        private ArrayList<String> bigram = new ArrayList<String>();
 
         public Entry(int h, K key, V value, Entry n ) {
+            this.value.add(position);
+            this.value.add(bigram);
             this.key = key;
+           // if (value instanceof Integer){
+           //     this.value.get(0).;
+           // }
             this.value.add(value);
             this.next = n;
             this.hash = h;
@@ -469,6 +475,22 @@ public class FileMap implements Map{
     }
 
     public static void main(String[] args) throws Exception {
+        ArrayList test = new ArrayList<>();
+        ArrayList position = new ArrayList<>();
+        ArrayList bigram = new ArrayList<>();
+
+        test.add(position);
+        test.add(bigram);
+
+        position.add(1);
+        bigram.add("hi");
+
+        System.out.println(test.toString());
+        for(Object elem: test)
+            System.out.println(elem.toString());
+
+
+        /*
         FileMap foo = new FileMap();
 
         System.out.println(foo.put("hi", 4));
@@ -481,6 +503,8 @@ public class FileMap implements Map{
 
         System.out.println(foo.put("hi", 6));
         System.out.println(foo.entrySet());
+
+         */
 
 
 
