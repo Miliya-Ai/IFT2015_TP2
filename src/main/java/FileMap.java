@@ -159,7 +159,7 @@ public class FileMap implements Map{
     }
     @Override
     public Object put(Object key, Object value) throws ClassCastException {
-        if (!((key instanceof String) && (value instanceof Integer))){
+        if (!((key instanceof String) && ((value instanceof Integer)|| (value instanceof String)))){
             throw new ClassCastException("La cle doit etre un string, le nom d'un fichier. " +
                                         "La valeur doit etre un int, la position du mot dans ce fichier.");
         }
@@ -369,10 +369,13 @@ public class FileMap implements Map{
             this.value.add(position);
             this.value.add(bigram);
             this.key = key;
-           // if (value instanceof Integer){
-           //     this.value.get(0).;
-           // }
-            this.value.add(value);
+            if (value instanceof Integer){
+                position.add((Integer) value);
+            }
+            if (value instanceof String){
+                bigram.add((String) value);
+            }
+
             this.next = n;
             this.hash = h;
 
@@ -382,6 +385,12 @@ public class FileMap implements Map{
         public ArrayList getValue() { return this.value; }
         public Entry getNext(){return this.next;}
         public boolean containSpecificValue(V value) {
+            if (value instanceof Integer){
+                return position.contains((Integer) value);
+            }
+            if (value instanceof String){
+                return bigram.contains((String) value);
+            }
             return this.value.contains(value);
         }
 
@@ -391,7 +400,17 @@ public class FileMap implements Map{
             ArrayList old = new ArrayList<>(); //Array[0] = listPosition, Array[1] = bigram du key
             old.addAll(this.value);
             if (!(containSpecificValue(value))){
-                this.value.add(value);
+                if (value instanceof Integer){
+                    position.add((Integer) value);
+                }
+                if (value instanceof String){
+                    if (bigram.size() != 0){
+                        bigram.set(0, (String) value);
+                    }
+                    else{
+                        bigram.add((String) value);
+                    }
+                }
             }
             return (V) old;
         }
@@ -475,6 +494,7 @@ public class FileMap implements Map{
     }
 
     public static void main(String[] args) throws Exception {
+        /*
         ArrayList test = new ArrayList<>();
         ArrayList position = new ArrayList<>();
         ArrayList bigram = new ArrayList<>();
@@ -489,8 +509,10 @@ public class FileMap implements Map{
         for(Object elem: test)
             System.out.println(elem.toString());
 
+         */
 
-        /*
+
+
         FileMap foo = new FileMap();
 
         System.out.println(foo.put("hi", 4));
@@ -504,8 +526,10 @@ public class FileMap implements Map{
         System.out.println(foo.put("hi", 6));
         System.out.println(foo.entrySet());
 
-         */
+        System.out.println(foo.put("hi", "89"));
+        System.out.println(foo.put("hi", "yp"));
 
+        System.out.println(foo.entrySet());
 
 
 
