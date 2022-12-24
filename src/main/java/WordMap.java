@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.*;
 
 //TODO: WorldMap doit seulement accepter un FileMap comme valeur , pas un integer
@@ -286,7 +287,7 @@ public class WordMap implements Map {
             WordMap.Entry[] tab = table;
             for (int i = 0; i < tab.length ; i++)
                 for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
-                    entrySet.add((e));
+                    entrySet.add(e);
             /*
             for (int i = 0; i < capacity; i++) {
                 if (table[i] != null) {
@@ -464,12 +465,14 @@ public class WordMap implements Map {
     public static void main(String[] args) throws Exception {
         WordMap foo = new WordMap();
 
-        for (int i=0; i<20; i++){
+        /*for (int i=0; i<20; i++){
             foo.put("hi" + i,  1);
 
-        }
+        }*/
 
-
+        FileMap fileMap = new FileMap();
+        fileMap.put("strimg", 1);
+        foo.put("un mot", fileMap);
         System.out.println(foo.containsKey("hi16"));
 
         System.out.println(foo.size());

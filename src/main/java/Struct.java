@@ -2,6 +2,8 @@ import edu.stanford.nlp.pipeline.CoreDocument;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Struct {
     WordMap wordMap = new WordMap();
@@ -11,7 +13,6 @@ public class Struct {
 
 
     public Struct(){
-
     }
 
     public void createWordMap(String str, String file){
@@ -28,7 +29,7 @@ public class Struct {
                 wordMap.getEntry(word).getValue().put(file, position);
                 position ++;
             }
-        
+        System.out.println(HashSet.toString(wordMap.entrySet()));
     }
 
 

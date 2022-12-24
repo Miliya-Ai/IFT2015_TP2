@@ -10,8 +10,7 @@ public class Main {
         //double roundOff = Math.round(((double)8/11) * 100.0) / 100.0;
         //System.out.println(roundOff);
         // pour windows "C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset\\dataset"
-        Preprocess preprocess= new Preprocess("C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset\\dataset");
-        Preprocess preprocess2 = new Preprocess("C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset2\\dataset2");
+        Preprocess preprocess= new Preprocess("/Users/miliya.ai/Documents/GitHub/ift2015_TP2/dataset/dataset");
 
         new Query(preprocess.getStruct());
     }

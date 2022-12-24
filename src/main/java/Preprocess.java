@@ -34,9 +34,9 @@ public class Preprocess {
 
     public void preprocess(File file) throws IOException {
         //Pour mac
-        //FileReader reader = new FileReader(pathDataSet + "/"+file.getName());
+        FileReader reader = new FileReader(pathDataSet + "/"+file.getName());
 
-        FileReader reader = new FileReader(pathDataSet + "\\" + file.getName());
+        //FileReader reader = new FileReader(pathDataSet + "\\" + file.getName());
         BufferedReader br = new BufferedReader(reader);
         StringBuffer word = new StringBuffer();
         String line;
