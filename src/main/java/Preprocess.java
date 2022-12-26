@@ -11,6 +11,12 @@ public class Preprocess {
     Struct struct = new Struct();
     Query query;
 
+    public long getTemps() {
+        return temps;
+    }
+
+    long temps;
+
     public int getTotalFichiers() {
         return totalFichiers;
     }
@@ -75,9 +81,7 @@ public class Preprocess {
         str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
 
         writeFile(file, str);
-        long temps = System.nanoTime();
-        long convert = TimeUnit.SECONDS.convert(temps, TimeUnit.NANOSECONDS);
-        System.out.println(temps);
+        temps = System.nanoTime();
         this.struct.createWordMap(str, file.getName());
         //this.struct.createBigram(str, file.getName());
     }

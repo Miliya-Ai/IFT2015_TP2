@@ -12,7 +12,7 @@ public class Main {
             String pathDataset = args[0].trim();
             String pathQuery = args[1].trim();
             Preprocess preprocess = new Preprocess(pathDataset);
-            new Query(preprocess.getStruct().getWordMap(), preprocess.getTotalFichiers(), pathQuery );
+            new Query(preprocess.getStruct().getWordMap(), preprocess.getTotalFichiers(), pathQuery, preprocess.getTemps() );
         } catch (Exception e){
             System.out.println("Veuillez mettre le path de dataset, puis le path du query.txt");
 

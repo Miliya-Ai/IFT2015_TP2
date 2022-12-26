@@ -11,10 +11,12 @@ public class Query {
     String queryTFDF = "search ";
     String queryBigrams = "the most probable bigram of ";
 
-    public Query(WordMap wordMap,  int totalFichiers, String pathQuery) throws IOException {
+    public Query(WordMap wordMap,  int totalFichiers, String pathQuery, Long temps) throws IOException {
         this.pathQuery = pathQuery;
         this.totalFichiers = totalFichiers;
         init( wordMap);
+        System.out.println((System.nanoTime()-temps)/1000000+" milliseconds for querys");
+
     }
 
     public void init(WordMap wordMap) throws IOException {
@@ -43,9 +45,7 @@ public class Query {
             }
         }
         reader.close();
-        long temps = System.nanoTime();
-        long convert = TimeUnit.SECONDS.convert(temps, TimeUnit.NANOSECONDS);
-        System.out.println(temps);
+
 
     }
 
