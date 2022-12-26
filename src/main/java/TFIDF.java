@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 /**
@@ -29,7 +30,26 @@ public class TFIDF {
         return sBuilder.toString();
     }
 
-    public void calculerTFIDIF( ){
+    public void calculerTFIDIF( String wordAll){
+            FileMap<String, Integer> dict = new HashMap<String, Integer>();
+            WordMap<String, Float> tf = new HashMap<String, Float>();
+            int wordCount=0;
+
+            for(String word:wordAll.split(" ")){
+                wordCount++;
+                if(dict.containsKey(word)){
+                    dict.put(word,  dict.get(word)+1);
+                }else{
+                    dict.put(word, 1);
+                }
+            }
+
+            for(Map.Entry<String, Integer> entry:dict.entrySet()){
+                float wordTf=(float)entry.getValue()/wordCount;
+                tf.put(entry.getKey(), wordTf);
+            }
+
+        }
 /*
         //TFIDF
         FileMap fileMapTFIDF = new FileMap();
