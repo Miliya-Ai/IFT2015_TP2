@@ -29,7 +29,10 @@ public class Struct {
                 wordMap.getEntry(word).getValue().put(file, position);
                 position ++;
             }
-        System.out.println(wordMap.entrySet().toString());
+
+       // FileMap test = (FileMap) wordMap.get("Pluto");
+        //System.out.println(test.get("900.txt"));
+        TFIDF tfidf = new TFIDF(wordMap, position);
     }
 
 

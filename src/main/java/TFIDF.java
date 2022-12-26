@@ -8,6 +8,11 @@ import java.util.TreeMap;
  * Code inspire https://blog.csdn.net/yeyu_xing/article/details/109084754
  */
 public class TFIDF {
+
+    public TFIDF(WordMap worMap, int totalMot){
+        
+    }
+
     public static String getTxtString(String path) {
         StringBuilder sBuilder = new StringBuilder();
         BufferedReader br = null;
