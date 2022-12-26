@@ -217,9 +217,6 @@ public class FileMap implements Map{
 
     @Override
     public void putAll(Map m) {
-        /* for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
-            this.put(entry.getKey(), entry.getValue());
-        }*/
         FileMap.Entry[] tab = table;
         for (int i = 0; i < tab.length ; i++)
             for (FileMap.Entry entry = tab[i]; entry != null ; entry = entry.next){
@@ -263,23 +260,6 @@ public class FileMap implements Map{
             for (int i = 0; i < tab.length ; i++)
                 for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
                     values.add(e.getValue());
-            /*
-            for (int i = 0; i < capacity; i++){
-                if (table[i] == null) {
-                    continue;
-                } else {
-                    Entry bucket = table[i];
-                    while (bucket.getNext() != null) {
-
-                            values.add((V) bucket.getValue());
-
-                        bucket.getNext();
-                    }
-
-                }
-            }
-
-             */
         }
         return values;
     }
@@ -293,15 +273,6 @@ public class FileMap implements Map{
             for (int i = 0; i < tab.length ; i++)
                 for (FileMap.Entry e = tab[i]; e != null ; e = e.next)
                     entrySet.add((e));
-            /*
-            for (int i = 0; i < capacity; i++) {
-                if (table[i] != null) {
-
-                    //entrySet.add(table[i]);
-                }
-            }
-
-             */
         }
         return entrySet;
     }
@@ -362,7 +333,7 @@ public class FileMap implements Map{
      */
     protected static class Entry<K, V>  {
         private K key; // for the key
-        private ArrayList value = new ArrayList<>() ; // for the value [ [liste position] [bigram pour le fichier]   ] 2476
+        private ArrayList value = new ArrayList<>() ;
         private Entry next;
         final int hash;
         private ArrayList<Integer> position = new ArrayList<Integer>();
@@ -408,7 +379,7 @@ public class FileMap implements Map{
 
         protected void setKey( K key ) { this.key = key; }
         public V setValue( V value ) {
-            ArrayList old = new ArrayList<>(); //Array[0] = listPosition, Array[1] = bigram du key
+            ArrayList old = new ArrayList<>();
             old.addAll(this.value);
             if (!(containSpecificValue(value))){
                 if (value instanceof Integer){
@@ -416,15 +387,6 @@ public class FileMap implements Map{
                 }
                 if (value instanceof String){
                     bigram.add((String) value);
-                    /*
-                    if (bigram.size() != 0){
-                        bigram.set(0, (String) value);
-                    }
-                    else{
-                        bigram.add((String) value);
-                    }
-
-                     */
                 }
                 if (value instanceof Float){
                     if (TFIDF.size() != 0){
@@ -487,58 +449,4 @@ public class FileMap implements Map{
 
     }
 
-    private final class ValueIterator extends FileMapIterator<Object> {
-        public Object next() {
-            return nextEntry().value;
-        }
-    }
-
-    private final class KeyIterator extends FileMapIterator<Object> {
-        public Object next() {
-            return nextEntry().getKey();
-        }
-    }
-
-    private final class EntryIterator extends FileMapIterator<Object> {
-        public FileMap.Entry next() {
-            return nextEntry();
-        }
-    }
-
-    // Subclass overrides these to alter behavior of views' iterator() method
-    Iterator<Object> newKeyIterator()   {
-        return new FileMap.KeyIterator();
-    }
-    Iterator<Object> newValueIterator()   {
-        return new FileMap.ValueIterator();
-    }
-    Iterator<Object> newEntryIterator()   {
-        return new FileMap.EntryIterator();
-    }
-
-    public static void main(String[] args) throws Exception {
-        FileMap foo = new FileMap();
-
-        System.out.println(foo.put("hi", 4));
-
-
-        System.out.println(foo.entrySet());
-
-        System.out.println(foo.put("hi", 5));
-        System.out.println(foo.entrySet());
-
-        System.out.println(foo.put("hi", 6));
-        System.out.println(foo.entrySet());
-
-        System.out.println(foo.put("hi", "89"));
-        System.out.println(foo.put("hi", "yp"));
-
-        foo.put("hi", 34.5);
-        foo.put("hi", 84.5);
-
-        System.out.println(foo.entrySet());
-
-
-
-    }
 }

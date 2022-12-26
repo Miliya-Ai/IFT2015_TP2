@@ -1,7 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class Query {
     TFIDF tfidf;
@@ -43,6 +43,9 @@ public class Query {
             }
         }
         reader.close();
+        long temps = System.nanoTime();
+        long convert = TimeUnit.SECONDS.convert(temps, TimeUnit.NANOSECONDS);
+        System.out.println(temps);
 
     }
 

@@ -4,12 +4,6 @@ public class Bigrams<Mot> {
     //suggesting the next most probable word like an auto-complete function which is
     //related to the concept named bi-grams in NLP;
     String mot;
-    int countWord;
-    int index = 0;
-    String[] contenu;
-    String temp;
-    String motMaxTempDataSet = "";
-    int frequenceMaxTempDataSet = 0;
     String motMaxDataSet = "";
     int frequenceMaxDataSet = 0;
     ArrayList<String> toutMotsSuivant = new ArrayList<>();
@@ -37,7 +31,7 @@ public class Bigrams<Mot> {
             if (toutMotsSuivant.size() == 0){
                 System.out.println("Il n'y a pas de bigramme pour le mot : " + mot);
             } else {
-                bigramForFile(toutMotsSuivant);
+                bigramAllFile(toutMotsSuivant);
                 System.out.println(mot + " " + motMaxDataSet);
             }
         } else {
@@ -45,14 +39,11 @@ public class Bigrams<Mot> {
         }
 
     }
-    public void bigramForFile(ArrayList<String> bigram) {
+    public void bigramAllFile(ArrayList<String> bigram) {
         String motMax = "";
         String motTemp = "";
         int frequenceMax = 0;
         int frequenceTemp = 0;
-
-
-
 
         for (int i = 0; i < bigram.size(); i++) {
             motTemp = bigram.get(i);
@@ -76,61 +67,12 @@ public class Bigrams<Mot> {
                 }
             }
             frequenceTemp = 0;
-            //motTemp = "";
-
             frequenceMaxDataSet = frequenceMax;
             motMaxDataSet = motMax;
-            //frequenceMaxTempDataSet = frequenceMax;
-            //motMaxTempDataSet = motMax;
+
         }
     }
 
-    public double probabilityObserving2ndSword(ArrayList frequenceWord2){return (frequenceWord2.size()/countWord);}
-
-    public void countWord(WordMap wordMap, ArrayList string){
-        FileMap fileMap;
-        ArrayList value;
-        ArrayList position;
-        if (wordMap.containsKey(this.mot)){
-            fileMap = (FileMap) wordMap.get(this.mot);
-            for(Object file: fileMap.keySet()){
-                value = (ArrayList) fileMap.get(file);
-                position = (ArrayList) value.get(0);
-                countWord = position.size();
-                //bigram(string, position);
-            }
-        }
-
-    }
-
-    private void bigram(ArrayList string, ArrayList position) {
-        temp = (String) string.get(index);
-        contenu = temp.split(" ");
-        int pos;
-        int frequence2e;
-
-
-        for (int i = 0; i < countWord; i++){
-            pos = (int) position.get(i);
-           // mot2e.add(contenu[pos+1]);
-        }
-
-
-        index++;
-    }
-    public static void main(String[] args) {
-        String motMax = "a";
-        String motTemp = "b";
-        System.out.println(motMax.compareTo(motTemp));
-
-        String motMax1 = "b";
-        String motTemp1 = "a";
-        System.out.println(motMax1.compareTo(motTemp1));
-
-        String motMax2 = "a";
-        String motTemp2 = "a";
-        System.out.println(motMax2.compareTo(motTemp2));
-    }
 
 }
 

@@ -8,15 +8,6 @@ import java.util.Set;
 public class Struct {
     WordMap wordMap = new WordMap();
     String[] allWords = null;
-    ArrayList wordConsecutif = new ArrayList<>();
-    ArrayList position = new ArrayList<>();
-
-    public ArrayList getString() {
-        return string;
-    }
-
-    ArrayList string;
-
 
     public Struct(){
     }
@@ -43,16 +34,9 @@ public class Struct {
                 position ++;
             }
 
-        //FileMap test = (FileMap) wordMap.get("Pluto");
-        //System.out.println(test.get("900.txt"));
-        //TFIDF tfidf = new TFIDF(wordMap, position-1);
         TFIDF tfidf = new TFIDF(wordMap, position-1, file, true);
 
 
-    }
-
-    public void createBigram(String str, String file){
-        string.add(str.split(" "));
     }
 
     public WordMap getWordMap(){

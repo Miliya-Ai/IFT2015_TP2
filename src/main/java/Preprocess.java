@@ -1,13 +1,8 @@
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.objectbank.LineIterator;
 import edu.stanford.nlp.pipeline.*;
-
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.stream.Stream;
+import java.util.concurrent.TimeUnit;
 
 public class Preprocess {
     private final String pathDataSet;
@@ -80,7 +75,9 @@ public class Preprocess {
         str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
 
         writeFile(file, str);
-
+        long temps = System.nanoTime();
+        long convert = TimeUnit.SECONDS.convert(temps, TimeUnit.NANOSECONDS);
+        System.out.println(temps);
         this.struct.createWordMap(str, file.getName());
         //this.struct.createBigram(str, file.getName());
     }
@@ -98,17 +95,6 @@ public class Preprocess {
     }
 
     //------------------------------------ GETTERS ------------------------------------------------//
-    public String getPathDataSet() {
-        return pathDataSet;
-    }
-
-    public File getDirectoryPath() {
-        return directoryPath;
-    }
-
-    public File[] getFilesList() {
-        return filesList;
-    }
 
     public Struct getStruct() {
         return struct;
