@@ -117,9 +117,12 @@ public class FileMap implements Map{
      */
     @Override
     public boolean containsValue(Object value) throws ClassCastException {
+        /*
         if (!(value instanceof Integer)){
             throw new ClassCastException("La valeur doit etre un Int, la position du mot dans le fichier.");
         }
+
+         */
 
         if (size() == 0){
             return false;
@@ -412,12 +415,16 @@ public class FileMap implements Map{
                     position.add((Integer) value);
                 }
                 if (value instanceof String){
+                    bigram.add((String) value);
+                    /*
                     if (bigram.size() != 0){
                         bigram.set(0, (String) value);
                     }
                     else{
                         bigram.add((String) value);
                     }
+
+                     */
                 }
                 if (value instanceof Float){
                     if (TFIDF.size() != 0){

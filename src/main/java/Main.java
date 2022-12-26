@@ -2,16 +2,29 @@ import java.io.*;
 
 public class Main {
     /**
-     * Driver class method.
-     * @param args Not used.
-     * @throws Exception Throws file exception.
+     * @author Kim Trinh (20215539)
+     * @author Miliya Ai (20180783)
+     * @param args index 0 = dataset, index 1 = query.txt
      */
     public static void main(String[] args) throws Exception {
-        //double roundOff = Math.round(((double)8/11) * 100.0) / 100.0;
-        //System.out.println(roundOff);
-        // pour windows "C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset\\dataset"
+
+        try {
+            String pathDataset = args[0].trim();
+            String pathQuery = args[1].trim();
+            Preprocess preprocess = new Preprocess(pathDataset);
+            new Query(preprocess.getStruct().getWordMap(), preprocess.getTotalFichiers(), pathQuery );
+            //Preprocess preprocess= new Preprocess("C:/Users/Admin/Documents/GitHub/ift2015_TP2/dataset/dataset");
+            //new Query(preprocess.getStruct().getWordMap(), preprocess.getTotalFichiers(), "C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\src\\main\\java\\query.txt");
+        } catch (Exception e){
+            System.out.println("Veuillez mettre le path de dataset, puis le path du query.txt");
+
+        }
+
+
+
         //Preprocess preprocess= new Preprocess("/Users/miliya.ai/Documents/GitHub/ift2015_TP2/dataset/dataset");
-        Preprocess preprocess= new Preprocess("C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\dataset2\\dataset2");
-        new Query(preprocess.getStruct().getWordMap(), preprocess.getStruct().getString(), preprocess.getTotalFichiers(), "C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\src\\main\\java\\query.txt");
+
+        //Preprocess preprocess= new Preprocess("C:/Users/Admin/Documents/GitHub/ift2015_TP2/dataset/dataset");
+        //new Query(preprocess.getStruct().getWordMap(), preprocess.getTotalFichiers(), "C:\\Users\\Admin\\Documents\\GitHub\\ift2015_TP2\\src\\main\\java\\query.txt");
     }
 }

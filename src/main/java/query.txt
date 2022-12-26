@@ -1,3 +1,4 @@
-search planet
-the most probable bigram of new
-search species
+search Pluto
+the most probable bigram of diameter
+search a
+

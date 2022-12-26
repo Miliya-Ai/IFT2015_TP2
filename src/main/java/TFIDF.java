@@ -24,6 +24,28 @@ public class TFIDF {
         calculerTFIDF(wordMap, totalFichier, mot);
     }
 
+    public TFIDF( WordMap wordMap, int totalMot, String fichier, Boolean calculerTFI){
+        calculerTFI(wordMap, totalMot, fichier);
+    }
+
+    public void calculerTFI(WordMap wordMap, int wordAll, String file){
+        FileMap temp = new FileMap();
+        float wordTf;
+        ArrayList fileMapValue = new ArrayList();
+        ArrayList position = new ArrayList();
+        ArrayList TFI = new ArrayList<>();
+        for (Object word: wordMap.keySet()) {
+            temp = (FileMap) wordMap.get(word);
+            if (temp.containsKey(file)){
+                fileMapValue = (ArrayList) temp.get(file);
+                position = (ArrayList) fileMapValue.get(0);
+
+                wordTf = (float) position.size() / wordAll;
+                temp.put(file, wordTf);
+                //System.out.println("Mot : " + word + " FileMap : " + fileMapValue);
+            }
+        }
+    }
     public static String getTxtString(String path) {
         StringBuilder sBuilder = new StringBuilder();
         BufferedReader br = null;
@@ -61,6 +83,7 @@ public class TFIDF {
                 if (TFI.size() == 0) {
                     wordTf = (float) position.size() / wordAll;
                     temp.put(file, wordTf);
+                    System.out.println("Mot : " + word + " FileMap : " + fileMapValue);
                 }
             }
         }
@@ -79,7 +102,7 @@ public class TFIDF {
         float tfi;
         boolean prendreTFIDF = true;
         if (wordMap.containsKey(mot)){
-            fileMap = (FileMap) wordMap.get(mot);
+            fileMap = (FileMap) wordMap.get(mot); // a la place, peut faire fileMap =  wordMap.get(mot) if filemap == null sout(mot pas dans wordMap) else ...
             for(Object file: fileMap.keySet()){
                 fileMapValue = (ArrayList) fileMap.get(file);
                 TFI = (ArrayList) fileMapValue.get(2);

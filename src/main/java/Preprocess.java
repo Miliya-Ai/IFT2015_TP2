@@ -82,15 +82,15 @@ public class Preprocess {
         writeFile(file, str);
 
         this.struct.createWordMap(str, file.getName());
-        this.struct.createBigram(str, file.getName());
+        //this.struct.createBigram(str, file.getName());
     }
     //https://stackoverflow.com/questions/6994518/how-to-delete-the-content-of-text-file-without-deleting-itself
     // code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java
     public void writeFile(File file, String str) throws IOException {
-        PrintWriter pw = new PrintWriter(pathDataSet + "\\" + file.getName());
+        PrintWriter pw = new PrintWriter(pathDataSet + "/" + file.getName());
         pw.close();
 
-        FileWriter writer = new FileWriter(pathDataSet + "\\" + file.getName());
+        FileWriter writer = new FileWriter(pathDataSet + "/" + file.getName());
         BufferedWriter bufferedWriter = new BufferedWriter(writer);
         bufferedWriter.write(str);
 

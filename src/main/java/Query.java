@@ -11,26 +11,24 @@ public class Query {
     String queryTFDF = "search ";
     String queryBigrams = "the most probable bigram of ";
 
-    public Query(WordMap wordMap, ArrayList string, int totalFichiers, String pathQuery) throws IOException {
+    public Query(WordMap wordMap,  int totalFichiers, String pathQuery) throws IOException {
         this.pathQuery = pathQuery;
         this.totalFichiers = totalFichiers;
-        init( wordMap, string);
+        init( wordMap);
     }
 
-    public void init(WordMap wordMap, ArrayList string) throws IOException {
-        lire(wordMap, string);
+    public void init(WordMap wordMap) throws IOException {
+        lire(wordMap);
 
     }
 
     public void seeTFIDF(WordMap wordMap, String line){
-        System.out.println("dans query seeTFIDF");
         String mot = line.replace(queryTFDF, "");
-        System.out.println(mot);
         tfidf = new TFIDF(wordMap, totalFichiers, mot);
     }
 
 
-    public void lire(WordMap wordMap,ArrayList string ) throws IOException {
+    public void lire(WordMap wordMap) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(pathQuery));
 
         String line;
@@ -39,7 +37,7 @@ public class Query {
             if (line.contains(queryTFDF)){
                 seeTFIDF(wordMap, line);
             } else if (line.contains(queryBigrams)){
-                seeBigram(wordMap, line, string);
+                seeBigram(wordMap, line);
             } else{
                 System.out.println("mauvais query: " + line);
             }
@@ -48,11 +46,9 @@ public class Query {
 
     }
 
-    private void seeBigram(WordMap wordMap, String line, ArrayList string) {
-        System.out.println("dans query seeBigram");
+    private void seeBigram(WordMap wordMap, String line) {
         String mot = line.replace(queryBigrams, "");
-        System.out.println(mot);
-        bigrams = new Bigrams(wordMap, mot, string);
+        bigrams = new Bigrams(wordMap, mot);
     }
 
 
