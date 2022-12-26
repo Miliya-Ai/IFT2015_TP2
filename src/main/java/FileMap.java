@@ -159,7 +159,7 @@ public class FileMap implements Map{
     }
     @Override
     public Object put(Object key, Object value) throws ClassCastException {
-        if (!((key instanceof String) && ((value instanceof Integer)|| (value instanceof String)|| (value instanceof Double)))){
+        if (!((key instanceof String) && ((value instanceof Integer)|| (value instanceof String)|| (value instanceof Float)))){
             throw new ClassCastException("La cle doit etre un string, le nom d'un fichier. " +
                                         "La valeur doit etre un int, la position du mot dans ce fichier.");
         }
@@ -364,7 +364,7 @@ public class FileMap implements Map{
         final int hash;
         private ArrayList<Integer> position = new ArrayList<Integer>();
         private ArrayList<String> bigram = new ArrayList<String>();
-        private ArrayList<Double> TFIDF = new ArrayList<>();
+        private ArrayList<Float> TFIDF = new ArrayList<>();
 
         public Entry(int h, K key, V value, Entry n ) {
             this.value.add(position);
@@ -377,8 +377,8 @@ public class FileMap implements Map{
             if (value instanceof String){
                 bigram.add((String) value);
             }
-            if (value instanceof Double){
-                TFIDF.add((Double) value);
+            if (value instanceof Float){
+                TFIDF.add((Float) value);
             }
 
             this.next = n;
@@ -396,8 +396,8 @@ public class FileMap implements Map{
             if (value instanceof String){
                 return bigram.contains((String) value);
             }
-            if (value instanceof Double){
-                return TFIDF.contains((Double) value);
+            if (value instanceof Float){
+                return TFIDF.contains((Float) value);
             }
             return this.value.contains(value);
         }
@@ -419,12 +419,12 @@ public class FileMap implements Map{
                         bigram.add((String) value);
                     }
                 }
-                if (value instanceof Double){
+                if (value instanceof Float){
                     if (TFIDF.size() != 0){
-                        TFIDF.set(0, (Double) value);
+                        TFIDF.set(0, (Float) value);
                     }
                     else{
-                        TFIDF.add((Double) value);
+                        TFIDF.add((Float) value);
                     }
                 }
             }

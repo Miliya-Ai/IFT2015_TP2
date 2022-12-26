@@ -11,6 +11,12 @@ public class Struct {
     ArrayList wordConsecutif = new ArrayList<>();
     ArrayList position = new ArrayList<>();
 
+    public ArrayList getString() {
+        return string;
+    }
+
+    ArrayList string;
+
 
     public Struct(){
     }
@@ -30,12 +36,14 @@ public class Struct {
                 position ++;
             }
 
-       // FileMap test = (FileMap) wordMap.get("Pluto");
+        //FileMap test = (FileMap) wordMap.get("Pluto");
         //System.out.println(test.get("900.txt"));
-        TFIDF tfidf = new TFIDF(wordMap, position);
+        TFIDF tfidf = new TFIDF(wordMap, position-1);
     }
 
-
+    public void createBigram(String str, String file){
+        string.add(str.split(" "));
+    }
 
     public WordMap getWordMap(){
         return this.wordMap;

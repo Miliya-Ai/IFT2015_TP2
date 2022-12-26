@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -9,8 +10,18 @@ import java.util.TreeMap;
  */
 public class TFIDF {
 
+    /**
+     * TFI
+     * @param worMap wordMap du dataset
+     * @param totalMot nombre total de mot pour chaque fichier
+     */
     public TFIDF(WordMap worMap, int totalMot){
-        
+        calculerTFI(worMap, totalMot);
+
+    }
+
+    public  TFIDF(WordMap wordMap, int totalFichier, String mot){
+        calculerTFIDF(wordMap, totalFichier, mot);
     }
 
     public static String getTxtString(String path) {
@@ -35,26 +46,74 @@ public class TFIDF {
         return sBuilder.toString();
     }
 
-    public void calculerTFIDIF( String wordAll){
-            FileMap<String, Integer> dict = new HashMap<String, Integer>();
-            WordMap<String, Float> tf = new HashMap<String, Float>();
-            int wordCount=0;
-
-            for(String word:wordAll.split(" ")){
-                wordCount++;
-                if(dict.containsKey(word)){
-                    dict.put(word,  dict.get(word)+1);
-                }else{
-                    dict.put(word, 1);
+    public void calculerTFI(WordMap wordMap, int wordAll){
+        FileMap temp = new FileMap();
+        float wordTf;
+        ArrayList fileMapValue = new ArrayList();
+        ArrayList position = new ArrayList();
+        ArrayList TFI = new ArrayList<>();
+        for (Object word: wordMap.keySet()) {
+            temp = (FileMap) wordMap.get(word);
+            for (Object file : temp.keySet()) {
+                fileMapValue = (ArrayList) temp.get(file);
+                position = (ArrayList) fileMapValue.get(0);
+                TFI = (ArrayList) fileMapValue.get(2);
+                if (TFI.size() == 0) {
+                    wordTf = (float) position.size() / wordAll;
+                    temp.put(file, wordTf);
                 }
             }
-
-            for(Map.Entry<String, Integer> entry:dict.entrySet()){
-                float wordTf=(float)entry.getValue()/wordCount;
-                tf.put(entry.getKey(), wordTf);
-            }
-
         }
+    }
+
+    public void calculerTFIDF(WordMap wordMap, int totalFichier, String mot){
+        FileMap fileMap;
+        float TFIDF;
+        float IDF;
+        ArrayList fileMapValue = new ArrayList();
+        ArrayList TFI = new ArrayList<>();
+        float temp = 0;
+        String fileTemp = "";
+        float temp1 = 0;
+        String fileTemp2 = "";
+        float tfi;
+        boolean prendreTFIDF = true;
+        if (wordMap.containsKey(mot)){
+            fileMap = (FileMap) wordMap.get(mot);
+            for(Object file: fileMap.keySet()){
+                fileMapValue = (ArrayList) fileMap.get(file);
+                TFI = (ArrayList) fileMapValue.get(2);
+                IDF = (float) Math.log(totalFichier/fileMap.size());
+                if (IDF != 0.0) {
+                    TFIDF = (float) TFI.get(0) * IDF;
+                    if (TFIDF > temp){
+                        temp = TFIDF;
+                        fileTemp = (String) file;
+                    }
+                }
+                else {
+                    prendreTFIDF = false;
+                    tfi = (float) TFI.get(0);
+                    if (tfi > temp1){
+                        temp1 = tfi;
+                        fileTemp2 = (String) file;
+                    }
+
+
+                }
+            }
+            if (prendreTFIDF)
+                System.out.println(fileTemp);
+            else
+                System.out.println(fileTemp2);
+
+        } else {
+            System.out.println("Dans le dataset fourni, il n'y a pas le mot : " + mot);
+        }
+
+
+
+    }
 /*
         //TFIDF
         FileMap fileMapTFIDF = new FileMap();
@@ -63,8 +122,9 @@ public class TFIDF {
             fileMapTFIDF = wordMap.getEntry(word).getValue();
         frequenceMot = fileMapTFIDF.getEntry(file).getValue().size();
 
+
  */
-    }
+
 
     /**
      *

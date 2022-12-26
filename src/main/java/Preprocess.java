@@ -14,6 +14,13 @@ public class Preprocess {
     File directoryPath;
     File filesList[];
     Struct struct = new Struct();
+    Query query;
+
+    public int getTotalFichiers() {
+        return totalFichiers;
+    }
+
+    int totalFichiers = 0;
 
     //constructeur
     public Preprocess(String pathDataSet) throws IOException {
@@ -29,7 +36,9 @@ public class Preprocess {
         filesList = directoryPath.listFiles();
         for (File file : filesList) {
             preprocess(file);
+            this.totalFichiers++;
         }
+
     }
 
     public void preprocess(File file) throws IOException {
@@ -56,7 +65,7 @@ public class Preprocess {
             CoreDocument document = new CoreDocument(finalline);
             // annnotate the document
             pipeline.annotate(document);
-            System.out.println(document.tokens());
+            //System.out.println(document.tokens());
             for (CoreLabel tok : document.tokens()) {
                 String str = String.valueOf(tok.lemma());
                 if (!(str.contains("'s") || str.contains("’s"))) {
@@ -73,6 +82,7 @@ public class Preprocess {
         writeFile(file, str);
 
         this.struct.createWordMap(str, file.getName());
+        this.struct.createBigram(str, file.getName());
     }
     //https://stackoverflow.com/questions/6994518/how-to-delete-the-content-of-text-file-without-deleting-itself
     // code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java
