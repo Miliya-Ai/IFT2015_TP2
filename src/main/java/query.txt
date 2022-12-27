@@ -1,5 +1,5 @@
 search
 the most probable bigram of New
-search a      
+search      a
 
 

@@ -29,7 +29,7 @@ public class Query {
     public void seeTFIDF(WordMap wordMap, String line){
         String mot = line.replace(queryTFIDF, "");
         if (mot.contains(" ")){
-            System.out.println("Mauvais query");
+            System.out.println("Mauvais query, votre " + mot + " contient des espace en trop.");
         }else {
             tfidf = new TFIDF(wordMap, totalFichiers, mot);
         }
@@ -63,7 +63,7 @@ public class Query {
         private void seeBigram (WordMap wordMap, String line){
             String mot = line.replace(queryBigrams, "");
             if (mot.contains(" ")){
-                System.out.println("Mauvais query, votre " + mot + "contient des espace en trop.");
+                System.out.println("Mauvais query, votre " + mot + " contient des espace en trop.");
             } else {
                 bigrams = new Bigrams(wordMap, mot);
             }
