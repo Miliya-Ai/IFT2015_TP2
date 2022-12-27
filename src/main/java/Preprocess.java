@@ -2,20 +2,17 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
 import java.io.*;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * @author Kim Trinh (20215539)
+ * @author Miliya Ai (20180783)
+ */
 public class Preprocess {
     private final String pathDataSet;
     File directoryPath;
     File filesList[];
     Struct struct = new Struct();
-    Query query;
 
-    public long getTemps() {
-        return temps;
-    }
-
-    long temps;
 
     public int getTotalFichiers() {
         return totalFichiers;
@@ -81,9 +78,8 @@ public class Preprocess {
         str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
 
         writeFile(file, str);
-        temps = System.nanoTime();
+
         this.struct.createWordMap(str, file.getName());
-        //this.struct.createBigram(str, file.getName());
     }
     //https://stackoverflow.com/questions/6994518/how-to-delete-the-content-of-text-file-without-deleting-itself
     // code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java

@@ -1,6 +1,10 @@
 import java.util.*;
 
 /**
+ *
+ *@author Kim Trinh (20215539)
+ *@author Miliya Ai (20180783)
+ *
  * FileMap utilise une structure de données ChainHashMap.
  *
  * Code inspire du prof, https://www.algolist.net/Data_structures/Hash_table/Chaining et du hashMap de java

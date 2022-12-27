@@ -1,5 +1,5 @@
-search planet
+search
 the most probable bigram of New
-search species
+search a      
 
 

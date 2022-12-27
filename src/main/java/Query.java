@@ -1,21 +1,23 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * @author Kim Trinh (20215539)
+ * @author Miliya Ai (20180783)
+ */
 public class Query {
     TFIDF tfidf;
     Bigrams bigrams;
     String pathQuery;
     int totalFichiers;
-    String queryTFDF = "search ";
+    String queryTFIDF = "search ";
     String queryBigrams = "the most probable bigram of ";
 
-    public Query(WordMap wordMap,  int totalFichiers, String pathQuery, Long temps) throws IOException {
+    public Query(WordMap wordMap,  int totalFichiers, String pathQuery) throws IOException {
         this.pathQuery = pathQuery;
         this.totalFichiers = totalFichiers;
         init( wordMap);
-        System.out.println((System.nanoTime()-temps)/1000000+" milliseconds for querys");
 
     }
 
@@ -25,35 +27,48 @@ public class Query {
     }
 
     public void seeTFIDF(WordMap wordMap, String line){
-        String mot = line.replace(queryTFDF, "");
-        tfidf = new TFIDF(wordMap, totalFichiers, mot);
+        String mot = line.replace(queryTFIDF, "");
+        if (mot.contains(" ")){
+            System.out.println("Mauvais query");
+        }else {
+            tfidf = new TFIDF(wordMap, totalFichiers, mot);
+        }
     }
 
 
     public void lire(WordMap wordMap) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(pathQuery));
 
-        String line;
+        String line = null;
 
-        while ((line = reader.readLine()) != null) {
-            if (line.contains(queryTFDF)){
-                seeTFIDF(wordMap, line);
-            } else if (line.contains(queryBigrams)){
-                seeBigram(wordMap, line);
-            } else if (line.contains(null)) {
+
+            while ((line = reader.readLine()) != null) {
+                //line = line.trim();
+                if (line.contains(queryTFIDF)) {
+                    seeTFIDF(wordMap, line);
+                } else if (line.contains(queryBigrams)) {
+                    seeBigram(wordMap, line);
+                } else if (line.isEmpty()) {
+                } else {
+
+                    System.out.println("mauvais query: " + line);
+                }
+            }
+            reader.close();
+
+
+    }
+
+
+        private void seeBigram (WordMap wordMap, String line){
+            String mot = line.replace(queryBigrams, "");
+            if (mot.contains(" ")){
+                System.out.println("Mauvais query, votre " + mot + "contient des espace en trop.");
             } else {
-                System.out.println("mauvais query: " + line);
+                bigrams = new Bigrams(wordMap, mot);
             }
         }
-        reader.close();
 
 
     }
 
-    private void seeBigram(WordMap wordMap, String line) {
-        String mot = line.replace(queryBigrams, "");
-        bigrams = new Bigrams(wordMap, mot);
-    }
-
-
-}

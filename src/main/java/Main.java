@@ -7,13 +7,16 @@ public class Main {
      * @param args index 0 = dataset, index 1 = query.txt
      */
     public static void main(String[] args) throws Exception {
+        int lenght = args.length;
+        if (lenght == 2){
 
-        try {
             String pathDataset = args[0].trim();
             String pathQuery = args[1].trim();
             Preprocess preprocess = new Preprocess(pathDataset);
-            new Query(preprocess.getStruct().getWordMap(), preprocess.getTotalFichiers(), pathQuery, preprocess.getTemps() );
-        } catch (Exception e){
+            new Query(preprocess.getStruct().getWordMap(), preprocess.getTotalFichiers(), pathQuery);
+
+        }
+        else{
             System.out.println("Veuillez mettre le path de dataset, puis le path du query.txt");
 
         }
