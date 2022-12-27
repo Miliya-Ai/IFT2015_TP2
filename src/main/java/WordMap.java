@@ -1,8 +1,15 @@
-import java.io.File;
 import java.util.*;
 
-//TODO: WorldMap doit seulement accepter un FileMap comme valeur , pas un integer
-
+/**
+ * @author Kim Trinh (20215539)
+ * @author Miliya Ai (20180783)
+ *
+ * WordMap utilise une structure de données ChainHashMap.
+ *
+ * Code inspire du prof, https://www.algolist.net/Data_structures/Hash_table/Chaining et du hashMap de java
+ *  cle : un mot
+ *  valeur : un fileMap
+ */
 public class WordMap implements Map {
     private WordMap.Entry[] table;
     private int buckets = 0; // le nombre de buckets
@@ -13,7 +20,8 @@ public class WordMap implements Map {
     final double maxLoadFactor = 0.75;
     final int originalCapacity = 11;
 
-    // TODO: verifier les cas exceptionnels propres a fileMap
+    // ------------------------------------ CONSTRUCTEUR  ------------------------------------ //
+
     public WordMap(int capacity, int prime) {
         this.prime = prime;
         this.capacity = capacity;
@@ -52,7 +60,7 @@ public class WordMap implements Map {
 
     /**
      *
-     * @param key une cle de FileMap
+     * @param key une cle de WordMap
      * @return index de la cle dans la table
      */
     protected int hashValue( Object key ) {
@@ -64,22 +72,22 @@ public class WordMap implements Map {
     }
     /**
      *
-     * @return le nombre de Entry de FileMap
+     * @return le nombre de Entry de WordMap
      */
     @Override
     public int size() { return this.buckets;}
 
     /**
      *
-     * @return true si FileMap est vide
+     * @return true si WordMap est vide
      */
     @Override
     public boolean isEmpty() { return this.size() == 0; }
 
     /**
      *
-     * @param key cle a chercher dans FileMap
-     * @return true si cette cle ce trouve dans le FileMap
+     * @param key cle a chercher dans WordMap
+     * @return true si cette cle ce trouve dans le WordMap
      * @throws ClassCastException cle doit etre un String
      */
     @Override
@@ -107,14 +115,14 @@ public class WordMap implements Map {
 
     /**
      *
-     * @param value valeur a chercher dans le FileMap
-     * @return true si la valeur se trouve dans le FileMap
-     * @throws ClassCastException value doit etre un int
+     * @param value valeur a chercher dans le WordMap
+     * @return true si la valeur se trouve dans le WordMap
+     * @throws ClassCastException value doit etre un FileMap
      */
     @Override
     public boolean containsValue(Object value) throws ClassCastException {
         if (!(value instanceof FileMap)){
-            throw new ClassCastException("La valeur doit etre un Int, la position du mot dans le fichier.");
+            throw new ClassCastException("La valeur doit etre un FileMap.");
         }
 
         if (size() == 0){
@@ -132,7 +140,7 @@ public class WordMap implements Map {
     @Override
     public Object get(Object key) throws ClassCastException {
         if (!(key instanceof String)){
-            throw new ClassCastException("La cle doit etre un String, le nom du fichier");
+            throw new ClassCastException("La cle doit etre un String, le mot");
         }
         int hash = hash(key.hashCode());
         for (WordMap.Entry e = table[indexFor(hash, table.length)];
@@ -157,7 +165,7 @@ public class WordMap implements Map {
     public Object put(Object key, Object value) throws ClassCastException {
         if (!((key instanceof String) && (value instanceof FileMap))){
             throw new ClassCastException("La cle doit etre un string, le nom d'un fichier. " +
-                    "La valeur doit etre un int, la position du mot dans ce fichier.");
+                    "La valeur doit etre un FileMap.");
         }
 
         int hash = hash(key.hashCode());
@@ -210,16 +218,13 @@ public class WordMap implements Map {
 
     @Override
     public void putAll(Map m) {
-        /* for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
-            this.put(entry.getKey(), entry.getValue());
-        }*/
         WordMap.Entry[] tab = table;
         for (int i = 0; i < tab.length ; i++)
             for (WordMap.Entry entry = tab[i]; entry != null ; entry = entry.next){
             this.put(entry.getKey(), entry.getValue());
         }
     }
-    //TODO: remettre a la capacity initial pour clear?
+
     @Override
     public void clear() {
         if (buckets != 0 ) {
@@ -239,9 +244,7 @@ public class WordMap implements Map {
             for (int i = 0; i < tab.length ; i++)
                 for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
                     keySet.add(e.getKey());
-
         }
-
 
         return keySet;
     }
@@ -256,23 +259,6 @@ public class WordMap implements Map {
             for (int i = 0; i < tab.length ; i++)
                 for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
                     values.add(e.getValue());
-            /*
-            for (int i = 0; i < capacity; i++){
-                if (table[i] == null) {
-                    continue;
-                } else {
-                    Entry bucket = table[i];
-                    while (bucket.getNext() != null) {
-
-                            values.add((V) bucket.getValue());
-
-                        bucket.getNext();
-                    }
-
-                }
-            }
-
-             */
         }
         return values;
     }
@@ -288,15 +274,6 @@ public class WordMap implements Map {
             for (int i = 0; i < tab.length ; i++)
                 for (WordMap.Entry e = tab[i]; e != null ; e = e.next)
                     entrySet.add(e);
-            /*
-            for (int i = 0; i < capacity; i++) {
-                if (table[i] != null) {
-
-                    //entrySet.add(table[i]);
-                }
-            }
-
-             */
         }
         return entrySet;
     }
@@ -329,20 +306,16 @@ public class WordMap implements Map {
         this.capacity = newCapacity;
         table = newTable;
 
-
-
-
     }
-
-
 
     /**
      *
-     * @return true si FileMap depasse le maxLoadFactor
+     * @return true si WordMap depasse le maxLoadFactor
      */
     public boolean isAboveLoadFactor(){
         double loadFactor = ( ((double)size()) / this.capacity);
-        double roundOff = Math.round( loadFactor * 100.0) / 100.0; // https://stackoverflow.com/questions/11701399/round-up-to-2-decimal-places-in-java
+        // https://stackoverflow.com/questions/11701399/round-up-to-2-decimal-places-in-java
+        double roundOff = Math.round( loadFactor * 100.0) / 100.0;
         return (roundOff > maxLoadFactor);
     }
 
@@ -396,88 +369,4 @@ public class WordMap implements Map {
         }
     }
 
-    private abstract class FileMapIterator<E> implements Iterator<E> {
-        WordMap.Entry next;        // next entry to return
-        int expectedModCount;   // For fast-fail
-        int index;              // current slot
-        WordMap.Entry current;     // current entry
-
-        void HashIterator() {
-            expectedModCount = modCount;
-            if (buckets > 0) { // advance to first entry
-                WordMap.Entry[] t = table;
-                while (index < t.length && (next = t[index++]) == null)
-                    ;
-            }
-        }
-
-        public final boolean hasNext() {
-            return next != null;
-        }
-
-        final WordMap.Entry nextEntry() {
-            if (modCount != expectedModCount)
-                throw new ConcurrentModificationException();
-            WordMap.Entry e = next;
-            if (e == null)
-                throw new NoSuchElementException();
-
-            if ((next = e.next) == null) {
-                WordMap.Entry[] t = table;
-                while (index < t.length && (next = t[index++]) == null)
-                    ;
-            }
-            current = e;
-            return e;
-        }
-
-
-    }
-
-    private final class ValueIterator extends WordMap.FileMapIterator<Object> {
-        public Object next() {
-            return nextEntry().value;
-        }
-    }
-
-    private final class KeyIterator extends WordMap.FileMapIterator<Object> {
-        public Object next() {
-            return nextEntry().getKey();
-        }
-    }
-
-    private final class EntryIterator extends WordMap.FileMapIterator<Object> {
-        public WordMap.Entry next() {
-            return nextEntry();
-        }
-    }
-
-    // Subclass overrides these to alter behavior of views' iterator() method
-    Iterator<Object> newKeyIterator()   {
-        return new WordMap.KeyIterator();
-    }
-    Iterator<Object> newValueIterator()   {
-        return new WordMap.ValueIterator();
-    }
-    Iterator<Object> newEntryIterator()   {
-        return new WordMap.EntryIterator();
-    }
-    public static void main(String[] args) throws Exception {
-        WordMap foo = new WordMap();
-
-        /*for (int i=0; i<20; i++){
-            foo.put("hi" + i,  1);
-
-        }*/
-
-        FileMap fileMap = new FileMap();
-        fileMap.put("strimg", 1);
-        foo.put("un mot", fileMap);
-        System.out.println(foo.containsKey("hi16"));
-
-        System.out.println(foo.size());
-        System.out.println(foo.keySet());
-        System.out.println(foo.values());
-        System.out.println(foo.entrySet());
-    }
 }

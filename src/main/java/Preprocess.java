@@ -4,49 +4,61 @@ import java.io.*;
 import java.util.Properties;
 
 /**
+ * Fait le pretraitement de tous les fichiers dans le dataset.
  * @author Kim Trinh (20215539)
  * @author Miliya Ai (20180783)
  */
 public class Preprocess {
     private final String pathDataSet;
-    File directoryPath;
-    File filesList[];
-    Struct struct = new Struct();
+    protected File[] filesList;
+    private final Struct struct = new Struct();
+    private int totalFichiers = 0;
 
+    // ------------------------------------ CONSTRUCTEUR  ------------------------------------ //
 
-    public int getTotalFichiers() {
-        return totalFichiers;
-    }
-
-    int totalFichiers = 0;
-
-    //constructeur
+    /**
+     * Initialise l'environnement de pretraitement.
+     * @param pathDataSet path du dataset
+     * @throws IOException si le fichier n'existe, un message d'erreur s'affichera
+     */
     public Preprocess(String pathDataSet) throws IOException {
         this.pathDataSet = pathDataSet;
         init();
     }
 
-    /*---------------------- Code de pretraitement de  Faezeh Pouya Mehr ------------------------------------------------
-      -------------------- https://studium.umontreal.ca/mod/forum/discuss.php?d=1241377 ------------------------------------*/
-    public void init() throws IOException {
+    // ------------------------------------ PRETRAITEMENT  ------------------------------------ //
+    /**
+     * Pour chaque fichier, faire le pretraitement.
+     * @throws IOException si le fichier n'existe, un message d'erreur s'affichera
+     */
+    private void init() throws IOException {
 
-        directoryPath = new File(pathDataSet);
-        filesList = directoryPath.listFiles();
-        for (File file : filesList) {
-            preprocess(file);
-            this.totalFichiers++;
+        File directoryPath = new File(this.pathDataSet);
+        this.filesList = directoryPath.listFiles();
+
+        if (this.filesList != null) {
+            for (File file : this.filesList) {
+                preprocess(file);
+                this.totalFichiers++;
+            }
         }
-
     }
 
-    public void preprocess(File file) throws IOException {
-        //Pour mac
+    /**
+     * Remplace tous les signes de ponctuation par des espaces, en remplaçant
+     * plusieurs espaces par un seul, effectuer un traitement de texte NLP et
+     * creer un wordMap contenant tous les mots du dataset.
+     *
+     * Code de pretraitement de  Faezeh Pouya Mehr.
+     * @param file un fichier du dataset
+     * @throws IOException si pour le path donne, le fichier n'existe pas, une erreur s'affichera
+     */
+    private void preprocess(File file) throws IOException {
         FileReader reader = new FileReader(pathDataSet + "/"+file.getName());
-
-        //FileReader reader = new FileReader(pathDataSet + "\\" + file.getName());
         BufferedReader br = new BufferedReader(reader);
-        StringBuffer word = new StringBuffer();
+        StringBuilder word = new StringBuilder();
         String line;
+
         while ((line = br.readLine()) != null) {
 
             String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
@@ -78,25 +90,36 @@ public class Preprocess {
         str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
 
         writeFile(file, str);
-
         this.struct.createWordMap(str, file.getName());
     }
-    //https://stackoverflow.com/questions/6994518/how-to-delete-the-content-of-text-file-without-deleting-itself
-    // code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java
-    public void writeFile(File file, String str) throws IOException {
+
+
+    /**
+     *
+     * @param file fichier a effacer le contenu pour en ecrire du texte pretraite
+     * @param str nouveau contenu pretraite a ecrire dans le fichier
+     * @throws IOException
+     * https://stackoverflow.com/questions/6994518/how-to-delete-the-content-of-text-file-without-deleting-itself
+     * code inspiré de https://www.codejava.net/java-se/file-io/how-to-read-and-write-text-file-in-java
+     */
+    private void writeFile(File file, String str) throws IOException {
+        // Efface le contenu du fichier
         PrintWriter pw = new PrintWriter(pathDataSet + "/" + file.getName());
         pw.close();
 
         FileWriter writer = new FileWriter(pathDataSet + "/" + file.getName());
         BufferedWriter bufferedWriter = new BufferedWriter(writer);
         bufferedWriter.write(str);
-
         bufferedWriter.close();
     }
 
     //------------------------------------ GETTERS ------------------------------------------------//
 
     public Struct getStruct() {
-        return struct;
+        return this.struct;
+    }
+
+    public int getTotalFichiers() {
+        return this.totalFichiers;
     }
 }

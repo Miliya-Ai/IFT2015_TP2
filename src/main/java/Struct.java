@@ -1,43 +1,49 @@
-import edu.stanford.nlp.pipeline.CoreDocument;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
+/**
+ * Construit le wordMap en emmagasinant les voisins droites de chaque mot et le TF du mot.
+ * @author Kim Trinh (20215539)
+ * @author Miliya Ai (20180783)
+ */
 public class Struct {
-    WordMap wordMap = new WordMap();
-    String[] allWords = null;
+    private final WordMap wordMap = new WordMap();
+    protected String[] allWords = null;
 
-    public Struct(){
-    }
+    // ------------------------------------ CONSTRUCTEUR  ------------------------------------ //
+    public Struct(){}
+
+
+    // ------------------------------------ NAISSANCE DE WORDMAP  ------------------------------------ //
 
     public void createWordMap(String str, String file){
         allWords = str.split(" ");
-        int position = 1;
-        String motPrecedent = "";
+        int position = 1; //Position de chaque mot
+        String motPrecedent = ""; //Le premier mot n'a pas de mot qui le precede
 
         for (String word: allWords)
             if (!(wordMap.containsKey(word))){
                 FileMap fileMap = new FileMap();
                 fileMap.put(file, position);
+
                 if (!motPrecedent.equals(""))
                     wordMap.getEntry(motPrecedent).getValue().put(file, word);
+
                 wordMap.put(word, fileMap);
                 motPrecedent = word;
                 position ++;
+
             } else {
                 wordMap.getEntry(word).getValue().put(file, position);
+
                 if (!motPrecedent.equals(""))
                     wordMap.getEntry(motPrecedent).getValue().put(file, word);
                 motPrecedent = word;
                 position ++;
             }
 
-        TFIDF tfidf = new TFIDF(wordMap, position-1, file, true);
+        new TFIDF(wordMap, position-1, file, true);
 
 
     }
+    //------------------------------------ GETTERS ------------------------------------------------//
 
     public WordMap getWordMap(){
         return this.wordMap;

@@ -1,10 +1,14 @@
-import java.io.*;
-
+/**
+ * @author Kim Trinh (20215539)
+ * @author Miliya Ai (20180783)
+ */
 public class Main {
     /**
-     * @author Kim Trinh (20215539)
-     * @author Miliya Ai (20180783)
+     * Ce TP2 fait un pretraitement des textes fournis dans le dataset.
+     * Puis, a partir des query, imprime sur la console le TFIDF ou le bigrams d'un mot.
      * @param args index 0 = dataset, index 1 = query.txt
+     * @see Preprocess
+     * @see Query
      */
     public static void main(String[] args) throws Exception {
         int lenght = args.length;

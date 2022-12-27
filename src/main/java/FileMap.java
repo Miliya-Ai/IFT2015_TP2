@@ -2,14 +2,14 @@ import java.util.*;
 
 /**
  *
- *@author Kim Trinh (20215539)
- *@author Miliya Ai (20180783)
+ * @author Kim Trinh (20215539)
+ * @author Miliya Ai (20180783)
  *
  * FileMap utilise une structure de données ChainHashMap.
  *
  * Code inspire du prof, https://www.algolist.net/Data_structures/Hash_table/Chaining et du hashMap de java
  *  cle : noms des fichiers
- *  valeur : positions du mot dans le fichier correspondant storer dans un arrayList
+ *  valeur : un arrayList ou a l'index 0, contient la position du mot; index 1, les mots voisins; index 2, le TF
  */
 public class FileMap implements Map{
     private Entry[] table;
@@ -21,7 +21,8 @@ public class FileMap implements Map{
     final double maxLoadFactor = 0.75;
     final int originalCapacity = 11;
 
-    // TODO: verifier les cas exceptionnels propres a fileMap
+    // ------------------------------------ CONSTRUCTEUR  ------------------------------------ //
+
     public FileMap(int capacity, int prime) {
         this.prime = prime;
         this.capacity = capacity;
@@ -121,12 +122,6 @@ public class FileMap implements Map{
      */
     @Override
     public boolean containsValue(Object value) throws ClassCastException {
-        /*
-        if (!(value instanceof Integer)){
-            throw new ClassCastException("La valeur doit etre un Int, la position du mot dans le fichier.");
-        }
-
-         */
 
         if (size() == 0){
             return false;
@@ -227,7 +222,7 @@ public class FileMap implements Map{
                 this.put(entry.getKey(), entry.getValue());
             }
     }
-    //TODO: remettre a la capacity initial pour clear?
+
     @Override
     public void clear() {
         if (buckets != 0 ) {
@@ -415,42 +410,5 @@ public class FileMap implements Map{
         }
     }
 
-    private abstract class FileMapIterator<E> implements Iterator<E> {
-        FileMap.Entry next;        // next entry to return
-        int expectedModCount;   // For fast-fail
-        int index;              // current slot
-        FileMap.Entry current;     // current entry
-
-        void HashIterator() {
-            expectedModCount = modCount;
-            if (buckets > 0) { // advance to first entry
-                FileMap.Entry[] t = table;
-                while (index < t.length && (next = t[index++]) == null)
-                    ;
-            }
-        }
-
-        public final boolean hasNext() {
-            return next != null;
-        }
-
-        final FileMap.Entry nextEntry() {
-            if (modCount != expectedModCount)
-                throw new ConcurrentModificationException();
-            FileMap.Entry e = next;
-            if (e == null)
-                throw new NoSuchElementException();
-
-            if ((next = e.next) == null) {
-                FileMap.Entry[] t = table;
-                while (index < t.length && (next = t[index++]) == null)
-                    ;
-            }
-            current = e;
-            return e;
-        }
-
-
-    }
 
 }
