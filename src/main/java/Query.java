@@ -40,7 +40,8 @@ public class Query {
                 seeTFIDF(wordMap, line);
             } else if (line.contains(queryBigrams)){
                 seeBigram(wordMap, line);
-            } else{
+            } else if (line.contains(null)) {
+            } else {
                 System.out.println("mauvais query: " + line);
             }
         }
